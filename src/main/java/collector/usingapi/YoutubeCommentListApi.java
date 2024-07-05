@@ -1,7 +1,7 @@
 package collector.usingapi;
 
-import collector.usingapi.responsevo.CommentDtoUsingApi;
 import collector.usingapi.requestvo.CommentRequestPart;
+import collector.usingapi.responsevo.CommentDtoUsingApi;
 import collector.usingapi.utils.HttpRequestApiManage;
 import collector.usingapi.utils.JSONObjectParser;
 import java.time.LocalDateTime;
@@ -33,14 +33,14 @@ public class YoutubeCommentListApi {
 
   public YoutubeCommentListApi(
       String apiKey, String baseUrl,
-      Set<CommentRequestPart> parts, String videoId,
-      int maxResults) {
+      Set<CommentRequestPart> parts, String videoId, int maxResults) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
     this.videoId = videoId;
     this.maxResults = maxResults;
     this.lastResponse = new JSONObject();
+
     this.totalTopLevelCommentCount = 0;
     this.totalCommentCount = 0;
   }
