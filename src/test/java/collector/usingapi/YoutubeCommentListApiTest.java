@@ -1,6 +1,5 @@
-package collector.usingapi.utils;
+package collector.usingapi;
 
-import collector.usingapi.YoutubeCommentListApi;
 import collector.usingapi.requestvo.CommentRequestPart;
 import java.io.FileReader;
 import java.util.Properties;
@@ -34,7 +33,8 @@ class YoutubeCommentListApiTest {
             CommentRequestPart.SNIPPET,
             CommentRequestPart.REPLY),
         "cAczQwTAtGQ",
-        3
+        50,
+        new ExtractOnResponseReplyCollector()
     );
     while (youtubeCommentListApi.hasNextPage()) {
       youtubeCommentListApi.requestNextPage().forEach(System.out::println);

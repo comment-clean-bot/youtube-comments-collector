@@ -1,22 +1,22 @@
 package collector.usingapi;
 
 import collector.usingapi.requestvo.CommentRequestPart;
-import collector.usingapi.responsevo.CommentDtoUsingApi;
+import collector.usingapi.responsevo.CommentThreadsResponse;
 import collector.usingapi.utils.HttpRequestApiManage;
-import collector.usingapi.utils.JSONObjectParser;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import core.Comment;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import java.util.stream.Collectors;
 
 public class YoutubeCommentListApi {
-  private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+  private final static ObjectMapper objectMapper = initObjectMapper();
 
   public final static String COMMENT_THREAD_API_PATH = "/commentThreads";
 
@@ -26,20 +26,24 @@ public class YoutubeCommentListApi {
   private final String videoId;
   private final int maxResults;
 
-  private JSONObject lastResponse;
+  private final ReplyCollector replyCollector;
+
+  private CommentThreadsResponse lastResponse;
 
   private int totalTopLevelCommentCount;
   private int totalCommentCount;
 
   public YoutubeCommentListApi(
       String apiKey, String baseUrl,
-      Set<CommentRequestPart> parts, String videoId, int maxResults) {
+      Set<CommentRequestPart> parts, String videoId,
+      int maxResults, ReplyCollector replyCollector) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
     this.videoId = videoId;
     this.maxResults = maxResults;
-    this.lastResponse = new JSONObject();
+    this.lastResponse = null;
+    this.replyCollector = replyCollector;
 
     this.totalTopLevelCommentCount = 0;
     this.totalCommentCount = 0;
@@ -53,21 +57,36 @@ public class YoutubeCommentListApi {
     return totalCommentCount;
   }
 
-  public List<CommentDtoUsingApi> requestNextPage() {
-    lastResponse = JSONObjectParser.parseResponse(HttpRequestApiManage.sendGetRequest(
+  public int getMaxResults() {
+    return maxResults;
+  }
+
+  public List<Comment> requestNextPage() {
+    String jsonResponseString = HttpRequestApiManage.sendGetRequest(
         baseUrl + COMMENT_THREAD_API_PATH,
         makeHeaders(),
         makeRequestQueries()
-    ));
+    );
 
-    List<CommentDtoUsingApi> output = extractCommentDtoList();
+    // TODO: exception handling
+    try {
+      lastResponse = objectMapper.readValue(jsonResponseString, CommentThreadsResponse.class);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    List<Comment> collectedComments = lastResponse.getItems().stream().map(
+        item -> item.getSnippet().getTopLevelComment().toComment()
+    ).collect(Collectors.toList());
+    collectedComments.addAll(replyCollector.collectReplies(lastResponse));
+
     totalTopLevelCommentCount += extractTotalResults();
-    totalCommentCount += output.size();
-    return output;
+    totalCommentCount += collectedComments.size();
+    return collectedComments;
   }
 
   public boolean hasNextPage() {
-    if (lastResponse.isEmpty()) {
+    if (lastResponse == null) {
       return true;
     }
     return !extractNextPageToken().isEmpty();
@@ -96,89 +115,23 @@ public class YoutubeCommentListApi {
   }
 
   private String extractNextPageToken() {
-    if (lastResponse.isEmpty()) {
+    if (lastResponse == null || lastResponse.getNextPageToken() == null) {
       return "";
     }
-    if (lastResponse.containsKey("nextPageToken")) {
-      return (String) lastResponse.get("nextPageToken");
-    }
-    return "";
+    return lastResponse.getNextPageToken();
   }
 
   private int extractTotalResults() {
-    if (lastResponse.isEmpty()) {
+    if (lastResponse == null) {
       return 0;
     }
-    if (lastResponse.containsKey("pageInfo")) {
-      JSONObject pageInfo = (JSONObject) lastResponse.get("pageInfo");
-      return (int) (long) pageInfo.get("totalResults");
-    }
-    return 0;
+    return lastResponse.getPageInfo().getTotalResults();
   }
 
-  private List<CommentDtoUsingApi> extractCommentDtoList() {
-    if (!lastResponse.containsKey("items")) {
-      return new ArrayList<>();
-    }
-
-    JSONArray items = (JSONArray) lastResponse.get("items");
-    List<CommentDtoUsingApi> output = new ArrayList<>();
-    for (Object item: items) {
-      JSONObject commentThread = (JSONObject) item;
-      if (!commentThread.containsKey("snippet")) {
-        continue;
-      }
-      JSONObject commentThreadSnippet = (JSONObject) commentThread.get("snippet");
-
-      if (!commentThreadSnippet.containsKey("topLevelComment")) {
-        continue;
-      }
-      JSONObject topLevelComment = (JSONObject) commentThreadSnippet.get("topLevelComment");
-      output.add(toCommentDto(topLevelComment));
-
-      if (commentThread.containsKey("replies")) {
-        output.addAll(extractReplyDtoList(commentThread));
-      }
-    }
-    return output;
+  private static ObjectMapper initObjectMapper() {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    return mapper;
   }
-
-  private List<CommentDtoUsingApi> extractReplyDtoList(JSONObject commentThread) {
-    if (!commentThread.containsKey("replies")) {
-      return new ArrayList<>();
-    }
-
-    JSONObject replies = (JSONObject) commentThread.get("replies");
-    if (!replies.containsKey("comments")) {
-      return new ArrayList<>();
-    }
-
-    JSONArray items = (JSONArray) replies.get("comments");
-    List<CommentDtoUsingApi> output = new ArrayList<>();
-    for (Object item: items) {
-      JSONObject comment = (JSONObject) item;
-      output.add(toCommentDto(comment));
-    }
-    return output;
-  }
-
-  private CommentDtoUsingApi toCommentDto(JSONObject commentJson) {
-    String id = (String) commentJson.getOrDefault("id", "");
-    JSONObject snippetJson = (JSONObject) commentJson.getOrDefault("snippet", new JSONObject());
-    return new CommentDtoUsingApi(
-        id,
-        (String) snippetJson.getOrDefault("channelId", ""),
-        (String) snippetJson.getOrDefault("videoId", ""),
-        (String) snippetJson.getOrDefault("parentId", ""),
-        (String) snippetJson.getOrDefault("textDisplay", ""),
-        (String) snippetJson.getOrDefault("textOriginal", ""),
-        (String) snippetJson.getOrDefault("authorDisplayName", ""),
-        (String) snippetJson.getOrDefault("authorProfileImageUrl", ""),
-        (String) snippetJson.getOrDefault("authorChannelUrl", ""),
-        (long) snippetJson.getOrDefault("likeCount", 0),
-        LocalDateTime.parse((String) snippetJson.getOrDefault("publishedAt", ""), formatter),
-        LocalDateTime.parse((String) snippetJson.getOrDefault("updatedAt", ""), formatter)
-    );
-  }
-
 }
