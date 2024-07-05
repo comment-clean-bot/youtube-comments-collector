@@ -1,5 +1,7 @@
 package collector.usingapi.utils;
 
+import collector.usingapi.YoutubeCommentListApi;
+import collector.usingapi.requestvo.CommentRequestPart;
 import java.io.FileReader;
 import java.util.Properties;
 import java.util.Set;
@@ -28,9 +30,9 @@ class YoutubeCommentListApiTest {
     YoutubeCommentListApi youtubeCommentListApi = new YoutubeCommentListApi(
         apiKey,
         "https://www.googleapis.com/youtube/v3",
-        Set.of(collector.usingapi.utils.CommentRequestPart.ID,
-            collector.usingapi.utils.CommentRequestPart.SNIPPET,
-            collector.usingapi.utils.CommentRequestPart.REPLY),
+        Set.of(CommentRequestPart.ID,
+            CommentRequestPart.SNIPPET,
+            CommentRequestPart.REPLY),
         "cAczQwTAtGQ",
         3
     );

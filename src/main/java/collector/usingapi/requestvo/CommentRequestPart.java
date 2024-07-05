@@ -1,4 +1,4 @@
-package collector.usingapi.utils;
+package collector.usingapi.requestvo;
 
 public enum CommentRequestPart {
   ID("id"),

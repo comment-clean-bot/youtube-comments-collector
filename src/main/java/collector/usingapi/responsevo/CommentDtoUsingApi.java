@@ -1,4 +1,4 @@
-package collector.usingapi;
+package collector.usingapi.responsevo;
 
 import core.Comment;
 import java.time.LocalDateTime;

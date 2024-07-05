@@ -1,6 +1,9 @@
-package collector.usingapi.utils;
+package collector.usingapi;
 
-import collector.usingapi.CommentDtoUsingApi;
+import collector.usingapi.responsevo.CommentDtoUsingApi;
+import collector.usingapi.requestvo.CommentRequestPart;
+import collector.usingapi.utils.HttpRequestApiManage;
+import collector.usingapi.utils.JSONObjectParser;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
