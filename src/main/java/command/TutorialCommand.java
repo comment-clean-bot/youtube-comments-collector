@@ -4,10 +4,14 @@ import command.handler.BaseCommandHandler;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
+import picocli.CommandLine.Option;
 
-@Command(name = "Base Collect Command", description = "Example of Collect command", subcommands = {
+@Command(name = "Tutorial Command", description = "Example of command line", subcommands = {
     HelpCommand.class})
-public class BaseCollectCommand implements Runnable {
+public class TutorialCommand implements Runnable {
+
+  @Option(names = "--user", defaultValue = "World", description = "Say Hello to user")
+  String user;
 
   // manage collector instances using private fields
   /* ex.
@@ -24,7 +28,7 @@ public class BaseCollectCommand implements Runnable {
 
     // inject collector instances
     // ex. new CommandLine((new BaseCollectCommand(collector)))
-    new CommandLine((new BaseCollectCommand()))
+    new CommandLine((new TutorialCommand()))
         .setExecutionExceptionHandler(new BaseCommandHandler())
         .execute(args);
 
@@ -35,5 +39,6 @@ public class BaseCollectCommand implements Runnable {
   public void run() {
     // do something (collecting logic)
     // ex. collector.collect();
+    System.out.println("Hello " + user + "!");
   }
 }
