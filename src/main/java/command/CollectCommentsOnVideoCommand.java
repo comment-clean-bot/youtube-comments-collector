@@ -1,8 +1,10 @@
 package command;
 
 import collector.usingapi.ExtractOnResponseReplyCollector;
+import collector.usingapi.ExtractWithRepliesApiCollector;
+import collector.usingapi.ReplyCollector;
 import collector.usingapi.YoutubeCommentListApi;
-import collector.usingapi.requestvo.CommentRequestPart;
+import collector.usingapi.requestvo.CommentThreadRequestPart;
 import command.handler.BaseCommandHandler;
 import java.io.FileReader;
 import java.util.Properties;
@@ -21,6 +23,9 @@ public class CollectCommentsOnVideoCommand implements Runnable {
 
   @Parameters(index = "0", description = "The video id to collect comments from")
   private String videoId;
+
+  @Option(names = "--collect-all-replies", description = "If set this value to false, collect only up to 5 replies.", defaultValue = "true")
+  private boolean collectAllReplies;
 
   @Option(names = "--page-size", description = "The number of comments to request per page", defaultValue = "50")
   private int pageSize;
@@ -42,18 +47,29 @@ public class CollectCommentsOnVideoCommand implements Runnable {
 
   @Override
   public void run() {
+    String baseUrl = "https://www.googleapis.com/youtube/v3";
+    ReplyCollector replyCollector = collectAllReplies ?
+        new ExtractWithRepliesApiCollector(apiKey, baseUrl) :
+        new ExtractOnResponseReplyCollector();
+
     YoutubeCommentListApi youtubeCommentListApi = new YoutubeCommentListApi(
         apiKey,
-        "https://www.googleapis.com/youtube/v3",
-        Set.of(CommentRequestPart.ID,
-            CommentRequestPart.SNIPPET,
-            CommentRequestPart.REPLY),
+        baseUrl,
+        Set.of(CommentThreadRequestPart.ID,
+            CommentThreadRequestPart.SNIPPET,
+            CommentThreadRequestPart.REPLY),
         videoId,
         pageSize,
-        new ExtractOnResponseReplyCollector()
+        replyCollector
     );
+    int collectedCommentCount = 0;
+    int collectedTopLevelCommentCount = 0;
     while (youtubeCommentListApi.hasNextPage()) {
       youtubeCommentListApi.requestNextPage().forEach(System.out::println);
+      collectedCommentCount += youtubeCommentListApi.getTotalCommentCount();
+      collectedTopLevelCommentCount += youtubeCommentListApi.getTotalTopLevelCommentCount();
     }
+    System.out.println("collectedTopLevelCommentCount = " + collectedTopLevelCommentCount);
+    System.out.println("collectedCommentCount = " + collectedCommentCount);
   }
 }

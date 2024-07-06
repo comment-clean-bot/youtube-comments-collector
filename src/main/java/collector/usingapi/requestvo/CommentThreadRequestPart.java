@@ -1,13 +1,14 @@
 package collector.usingapi.requestvo;
 
-public enum CommentRequestPart {
+public enum CommentThreadRequestPart {
   ID("id"),
   SNIPPET("snippet"),
+  REPLY("replies"),
   ;
 
   private final String part;
 
-  CommentRequestPart(String part) {
+  CommentThreadRequestPart(String part) {
     this.part = part;
   }
 
