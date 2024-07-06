@@ -28,7 +28,6 @@ public class YoutubeVideoListApi {
   private final String regionCode;
   private final int maxResults;
 
-  private final TargetVideoSelector videoSelector;
 
   private VideosResponse lastResponse;
 
@@ -37,7 +36,7 @@ public class YoutubeVideoListApi {
   public YoutubeVideoListApi(
       String apiKey, String baseUrl,
       Set<VideoRequestPart> parts, String chart, String regionCode,
-      int maxResults, TargetVideoSelector videoSelector) {
+      int maxResults) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
@@ -45,8 +44,6 @@ public class YoutubeVideoListApi {
     this.regionCode = regionCode;
     this.maxResults = maxResults;
     this.lastResponse = null;
-    this.videoSelector = videoSelector;
-
     this.totalVideoCount = 0;
   }
 
