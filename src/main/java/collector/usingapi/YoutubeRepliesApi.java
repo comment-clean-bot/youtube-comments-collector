@@ -1,7 +1,9 @@
 package collector.usingapi;
 
-import collector.usingapi.requestvo.CommentThreadRequestPart;
+import collector.usingapi.requestvo.CommentRequestPart;
+import collector.usingapi.responsevo.CommentResponse;
 import collector.usingapi.responsevo.CommentThreadsResponse;
+import collector.usingapi.responsevo.CommentsResponse;
 import collector.usingapi.utils.HttpRequestApiManage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,35 +17,33 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class YoutubeCommentListApi {
+public class YoutubeRepliesApi {
   private final static ObjectMapper objectMapper = initObjectMapper();
 
-  public final static String COMMENT_THREAD_API_PATH = "/commentThreads";
+  public final static String COMMENT_THREAD_API_PATH = "/comments";
 
   private final String apiKey;
   private final String baseUrl;
-  private final Set<CommentThreadRequestPart> parts;
-  private final String videoId;
+
+  private final Set<CommentRequestPart> parts;
+  private final String parentId;
   private final int maxResults;
 
-  private final ReplyCollector replyCollector;
-
-  private CommentThreadsResponse lastResponse;
+  private CommentsResponse lastResponse;
 
   private int totalTopLevelCommentCount;
   private int totalCommentCount;
 
-  public YoutubeCommentListApi(
+  public YoutubeRepliesApi(
       String apiKey, String baseUrl,
-      Set<CommentThreadRequestPart> parts, String videoId,
-      int maxResults, ReplyCollector replyCollector) {
+      Set<CommentRequestPart> parts, String parentId,
+      int maxResults) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
-    this.videoId = videoId;
+    this.parentId = parentId;
     this.maxResults = maxResults;
     this.lastResponse = null;
-    this.replyCollector = replyCollector;
 
     this.totalTopLevelCommentCount = 0;
     this.totalCommentCount = 0;
@@ -70,15 +70,14 @@ public class YoutubeCommentListApi {
 
     // TODO: exception handling
     try {
-      lastResponse = objectMapper.readValue(jsonResponseString, CommentThreadsResponse.class);
+      lastResponse = objectMapper.readValue(jsonResponseString, CommentsResponse.class);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
 
     List<Comment> collectedComments = lastResponse.getItems().stream().map(
-        item -> item.getSnippet().getTopLevelComment().toComment()
+        CommentResponse::toComment
     ).collect(Collectors.toList());
-    collectedComments.addAll(replyCollector.collectReplies(lastResponse));
 
     totalTopLevelCommentCount += extractTotalResults();
     totalCommentCount += collectedComments.size();
@@ -101,8 +100,8 @@ public class YoutubeCommentListApi {
 
   private Map<String, List<String>> makeRequestQueries() {
     Map<String, List<String>> queries = new HashMap<>();
-    queries.put("part", parts.stream().map(CommentThreadRequestPart::getPart).toList());
-    queries.put("videoId", List.of(videoId));
+    queries.put("part", parts.stream().map(CommentRequestPart::getPart).toList());
+    queries.put("parentId", List.of(parentId));
     queries.put("maxResults", List.of(String.valueOf(maxResults)));
     queries.put("key", List.of(apiKey));
 

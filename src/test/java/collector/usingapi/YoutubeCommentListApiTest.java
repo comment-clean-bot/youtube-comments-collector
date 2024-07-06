@@ -1,6 +1,6 @@
 package collector.usingapi;
 
-import collector.usingapi.requestvo.CommentRequestPart;
+import collector.usingapi.requestvo.CommentThreadRequestPart;
 import java.io.FileReader;
 import java.util.Properties;
 import java.util.Set;
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 class YoutubeCommentListApiTest {
 
+  private static final String BASE_URL = "https://www.googleapis.com/youtube/v3";
   private static String apiKey;
 
   @BeforeAll
@@ -25,16 +26,35 @@ class YoutubeCommentListApiTest {
   }
 
   @Test
-  void PRINT__Collect_comment_from_video_id() {
+  void PRINT__Collect_comment_from_video_id_with_top_5_replies() {
     YoutubeCommentListApi youtubeCommentListApi = new YoutubeCommentListApi(
         apiKey,
-        "https://www.googleapis.com/youtube/v3",
-        Set.of(CommentRequestPart.ID,
-            CommentRequestPart.SNIPPET,
-            CommentRequestPart.REPLY),
-        "cAczQwTAtGQ",
+        BASE_URL,
+        Set.of(CommentThreadRequestPart.ID,
+            CommentThreadRequestPart.SNIPPET,
+            CommentThreadRequestPart.REPLY),
+        "x_y4pWtGn8I",
         50,
         new ExtractOnResponseReplyCollector()
+    );
+    while (youtubeCommentListApi.hasNextPage()) {
+      youtubeCommentListApi.requestNextPage().forEach(System.out::println);
+    }
+    System.out.println("youtubeCommentListApi.getTotalTopLevelCommentCount() = " + youtubeCommentListApi.getTotalTopLevelCommentCount());
+    System.out.println("youtubeCommentListApi.getTotalCommentCount() = " + youtubeCommentListApi.getTotalCommentCount());
+  }
+
+  @Test
+  void PRINT__Collect_comment_from_video_id_with_all_replies() {
+    YoutubeCommentListApi youtubeCommentListApi = new YoutubeCommentListApi(
+        apiKey,
+        BASE_URL,
+        Set.of(CommentThreadRequestPart.ID,
+            CommentThreadRequestPart.SNIPPET,
+            CommentThreadRequestPart.REPLY),
+        "x_y4pWtGn8I",
+        50,
+        new ExtractWithRepliesApiCollector(apiKey, BASE_URL)
     );
     while (youtubeCommentListApi.hasNextPage()) {
       youtubeCommentListApi.requestNextPage().forEach(System.out::println);
