@@ -1,31 +1,21 @@
 package command;
 
-import collector.usingapi.ExtractOnResponseReplyCollector;
-import collector.usingapi.ExtractWithRepliesApiCollector;
-import collector.usingapi.ReplyCollector;
-import collector.usingapi.YoutubeCommentListApi;
-import collector.usingapi.requestvo.CommentThreadRequestPart;
+import collector.usingapi.PopularVideoSelector;
+import collector.usingapi.Video;
 import command.handler.BaseCommandHandler;
 import java.io.FileReader;
 import java.util.Properties;
-import java.util.Set;
+import java.util.stream.Stream;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 
-@Command(name = "Collect Comments On Video Command", description = "collect all comments on a single video", subcommands = {
+@Command(name = "Collect Most Popular Video", description = "collect top 200 current popular video", subcommands = {
     HelpCommand.class})
 public class PopularVideoCommand implements Runnable {
 
   private static String apiKey;
-
-  @Parameters(index = "0", description = "The video id to collect comments from")
-  private String videoId;
-
-  @Option(names = "--collect-all-replies", description = "If set this value to false, collect only up to 5 replies.", defaultValue = "true")
-  private boolean collectAllReplies;
 
   @Option(names = "--page-size", description = "The number of comments to request per page", defaultValue = "50")
   private int pageSize;
@@ -35,12 +25,12 @@ public class PopularVideoCommand implements Runnable {
     try (FileReader file = new FileReader(resourcePath)) {
       Properties p = new Properties();
       p.load(file);
-      apiKey = p.getProperty("key", "");
+      apiKey = p.getProperty("videoKey", "");
     } catch (Exception e) {
       System.out.println("cannot read properties file");
     }
 
-    new CommandLine((new CollectCommentsOnVideoCommand()))
+    new CommandLine((new PopularVideoCommand()))
         .setExecutionExceptionHandler(new BaseCommandHandler())
         .execute(args);
   }
@@ -48,28 +38,11 @@ public class PopularVideoCommand implements Runnable {
   @Override
   public void run() {
     String baseUrl = "https://www.googleapis.com/youtube/v3";
-    ReplyCollector replyCollector = collectAllReplies ?
-        new ExtractWithRepliesApiCollector(apiKey, baseUrl) :
-        new ExtractOnResponseReplyCollector();
+    System.out.println("Collecting top 200 popular videos");
+    PopularVideoSelector popularVideoSelector = new PopularVideoSelector(apiKey, baseUrl);
+    Stream<Video> popularVideos = popularVideoSelector.select();
+    popularVideos.forEach(System.out::println);
 
-    YoutubeCommentListApi youtubeCommentListApi = new YoutubeCommentListApi(
-        apiKey,
-        baseUrl,
-        Set.of(CommentThreadRequestPart.ID,
-            CommentThreadRequestPart.SNIPPET,
-            CommentThreadRequestPart.REPLY),
-        videoId,
-        pageSize,
-        replyCollector
-    );
-    int collectedCommentCount = 0;
-    int collectedTopLevelCommentCount = 0;
-    while (youtubeCommentListApi.hasNextPage()) {
-      youtubeCommentListApi.requestNextPage().forEach(System.out::println);
-      collectedCommentCount += youtubeCommentListApi.getTotalCommentCount();
-      collectedTopLevelCommentCount += youtubeCommentListApi.getTotalTopLevelCommentCount();
-    }
-    System.out.println("collectedTopLevelCommentCount = " + collectedTopLevelCommentCount);
-    System.out.println("collectedCommentCount = " + collectedCommentCount);
+    System.out.println("Total popular videos: " + popularVideos.count());
   }
 }
