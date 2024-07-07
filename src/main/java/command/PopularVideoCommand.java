@@ -20,6 +20,12 @@ public class PopularVideoCommand implements Runnable {
   @Option(names = "--page-size", description = "The number of comments to request per page", defaultValue = "50")
   private int pageSize;
 
+  @Option(names = "--total-max-count", description = "The number of comments to request per page", defaultValue = "200")
+  private int totalMaxCount;
+
+  @Option(names = "--off-music-category", description = "The number of comments to request per page", defaultValue = "false")
+  private boolean offMusicCategory;
+
   public static void main(String[] args) {
     String resourcePath = "src/main/resources/secrets/youtubeapi.properties";
     try (FileReader file = new FileReader(resourcePath)) {
@@ -39,7 +45,7 @@ public class PopularVideoCommand implements Runnable {
   public void run() {
     String baseUrl = "https://www.googleapis.com/youtube/v3";
     System.out.println("Collecting top 200 popular videos");
-    PopularVideoSelector popularVideoSelector = new PopularVideoSelector(apiKey, baseUrl);
+    PopularVideoSelector popularVideoSelector = new PopularVideoSelector(apiKey, baseUrl, pageSize,totalMaxCount,offMusicCategory);
     Stream<Video> popularVideos = popularVideoSelector.select();
     popularVideos.forEach(System.out::println);
 

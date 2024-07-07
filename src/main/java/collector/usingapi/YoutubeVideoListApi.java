@@ -28,6 +28,10 @@ public class YoutubeVideoListApi {
   private final String regionCode;
   private final int maxResults;
 
+  private final int totalMaxCount;
+
+  private final boolean offMusicCategory;
+
 
   private VideosResponse lastResponse;
 
@@ -36,13 +40,15 @@ public class YoutubeVideoListApi {
   public YoutubeVideoListApi(
       String apiKey, String baseUrl,
       Set<VideoRequestPart> parts, String chart, String regionCode,
-      int maxResults) {
+      int maxResults, int totalMaxCount, boolean offMusicCategory) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
     this.chart = chart;
     this.regionCode = regionCode;
     this.maxResults = maxResults;
+    this.totalMaxCount = totalMaxCount;
+    this.offMusicCategory = offMusicCategory;
     this.lastResponse = null;
     this.totalVideoCount = 0;
   }
@@ -71,7 +77,9 @@ public class YoutubeVideoListApi {
         item -> item.toVideo()
     ).collect(Collectors.toList());
 
-    totalVideoCount += extractTotalResults();
+    videos = videos.stream().filter(video -> !offMusicCategory || !video.categoryId().equals("10")).toList();
+
+    totalVideoCount += extractTotalResults(videos);
 
     return videos;
   }
@@ -95,7 +103,7 @@ public class YoutubeVideoListApi {
     queries.put("part", parts.stream().map(VideoRequestPart::getPart).toList());
     queries.put("chart", List.of(chart));
     queries.put("regionCode", List.of(regionCode));
-    queries.put("maxResults", List.of(String.valueOf(maxResults)));
+    queries.put("maxResults", List.of(String.valueOf(maxResults + totalVideoCount > totalMaxCount ? totalMaxCount - totalVideoCount : maxResults)));
     queries.put("key", List.of(apiKey));
 
     String nextPageToken = extractNextPageToken();
@@ -113,11 +121,11 @@ public class YoutubeVideoListApi {
     return lastResponse.getNextPageToken();
   }
 
-  private int extractTotalResults() {
+  private int extractTotalResults(List<Video> videos) {
     if (lastResponse == null) {
       return 0;
     }
-    return lastResponse.getPageInfo().getTotalResults();
+    return videos.size();
   }
 
   private static ObjectMapper initObjectMapper() {

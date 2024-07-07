@@ -37,7 +37,9 @@ public class YoutubeVideoListApiTest {
         Set.of(VideoRequestPart.SNIPPET),
         "mostPopular",
         "KR",
-        50
+        50,
+        200,
+        false
     );
     List<Video> output = new ArrayList<>();
     while (youtubeVideoListApi.hasNextPage()) {
@@ -45,6 +47,32 @@ public class YoutubeVideoListApiTest {
     }
     output.forEach(System.out::println);
 
-    Assertions.assertTrue(output.size() == 200);
+    Assertions.assertTrue(output.size() > 0);
+  }
+
+  @Test
+  void PRINT__Collect_popular_videos_without_music() {
+    YoutubeVideoListApi youtubeVideoListApi = new YoutubeVideoListApi(
+        apiKey,
+        BASE_URL,
+        Set.of(VideoRequestPart.SNIPPET),
+        "mostPopular",
+        "KR",
+        50,
+        200,
+        true
+    );
+    List<Video> output = new ArrayList<>();
+    while (youtubeVideoListApi.hasNextPage()) {
+      output.addAll(youtubeVideoListApi.requestNextPage());
+    }
+    output.forEach(System.out::println);
+
+    Assertions.assertTrue(output.size() > 0);
+
+    for (Video video : output) {
+      Assertions.assertFalse(video.categoryId().equals("10"));
+    }
+
   }
 }

@@ -11,9 +11,18 @@ public class PopularVideoSelector implements TargetVideoSelector{
 
   private final String baseUrl;
 
-  public PopularVideoSelector(String apiKey, String baseUrl) {
+  private final int maxResults;
+
+  private final int totalMaxCount;
+
+  private final boolean offMusicCategory;
+
+  public PopularVideoSelector(String apiKey, String baseUrl, int maxResults, int totalMaxCount, boolean offMusicCategory) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
+    this.maxResults = maxResults;
+    this.totalMaxCount = totalMaxCount;
+    this.offMusicCategory = offMusicCategory;
   }
 
   @Override
@@ -24,7 +33,9 @@ public class PopularVideoSelector implements TargetVideoSelector{
         Set.of(VideoRequestPart.SNIPPET),
         "mostPopular",
         "KR",
-        10
+        maxResults,
+        totalMaxCount,
+        offMusicCategory
     );
 
     List<Video> output = new ArrayList<>();
