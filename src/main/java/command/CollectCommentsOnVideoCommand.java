@@ -1,14 +1,17 @@
 package command;
 
+import collector.usingapi.BasicCommentOnVideoCollector;
+import collector.usingapi.CommentOnVideoCollector;
 import collector.usingapi.ExtractOnResponseReplyCollector;
 import collector.usingapi.ExtractWithRepliesApiCollector;
 import collector.usingapi.ReplyCollector;
-import collector.usingapi.YoutubeCommentListApi;
-import collector.usingapi.requestvo.CommentThreadRequestPart;
+import collector.usingapi.Video;
 import command.handler.BaseCommandHandler;
+import core.Comment;
 import java.io.FileReader;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
@@ -27,8 +30,17 @@ public class CollectCommentsOnVideoCommand implements Runnable {
   @Option(names = "--collect-all-replies", description = "If set this value to false, collect only up to 5 replies.", defaultValue = "true")
   private boolean collectAllReplies;
 
-  @Option(names = "--page-size", description = "The number of comments to request per page", defaultValue = "50")
-  private int pageSize;
+  @Option(names = "--comment-page-size", description = "The number of comments to request per page", defaultValue = "100")
+  private int commentPageSize;
+
+  @Option(names = "--comment-max-page-count", description = "The number of pages on collecting comments. If this value is set below zero, collect all pages.", defaultValue = "0")
+  private int commentMaxPageCount;
+
+  @Option(names = "--reply-page-size", description = "The number of replies to request per page", defaultValue = "100")
+  private int replyPageSize;
+
+  @Option(names = "--reply-max-page-count", description = "The number of pages on collecting replies. If this value is set below zero, collect all pages.", defaultValue = "0")
+  private int replyMaxPageCount;
 
   public static void main(String[] args) {
     String resourcePath = "src/main/resources/secrets/youtubeapi.properties";
@@ -49,27 +61,16 @@ public class CollectCommentsOnVideoCommand implements Runnable {
   public void run() {
     String baseUrl = "https://www.googleapis.com/youtube/v3";
     ReplyCollector replyCollector = collectAllReplies ?
-        new ExtractWithRepliesApiCollector(apiKey, baseUrl) :
+        new ExtractWithRepliesApiCollector(apiKey, baseUrl, replyPageSize, replyMaxPageCount) :
         new ExtractOnResponseReplyCollector();
 
-    YoutubeCommentListApi youtubeCommentListApi = new YoutubeCommentListApi(
-        apiKey,
-        baseUrl,
-        Set.of(CommentThreadRequestPart.ID,
-            CommentThreadRequestPart.SNIPPET,
-            CommentThreadRequestPart.REPLY),
-        videoId,
-        pageSize,
-        replyCollector
-    );
-    int collectedCommentCount = 0;
-    int collectedTopLevelCommentCount = 0;
-    while (youtubeCommentListApi.hasNextPage()) {
-      youtubeCommentListApi.requestNextPage().forEach(System.out::println);
-      collectedCommentCount += youtubeCommentListApi.getTotalCommentCount();
-      collectedTopLevelCommentCount += youtubeCommentListApi.getTotalTopLevelCommentCount();
-    }
-    System.out.println("collectedTopLevelCommentCount = " + collectedTopLevelCommentCount);
-    System.out.println("collectedCommentCount = " + collectedCommentCount);
+    CommentOnVideoCollector commentCollector = new BasicCommentOnVideoCollector(
+        apiKey, baseUrl, commentPageSize, commentMaxPageCount, replyCollector);
+
+    Video targetVideo = new Video(videoId, LocalDateTime.now(), "", "", "", "");
+
+    List<Comment> results = commentCollector.collectComments(targetVideo);
+    results.forEach(System.out::println);
+    System.out.println("results.size() = " + results.size());
   }
 }

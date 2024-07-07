@@ -2,7 +2,6 @@ package collector.usingapi;
 
 import collector.usingapi.requestvo.CommentRequestPart;
 import collector.usingapi.responsevo.CommentResponse;
-import collector.usingapi.responsevo.CommentThreadsResponse;
 import collector.usingapi.responsevo.CommentsResponse;
 import collector.usingapi.utils.HttpRequestApiManage;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,7 +26,7 @@ public class YoutubeRepliesApi {
 
   private final Set<CommentRequestPart> parts;
   private final String parentId;
-  private final int maxResults;
+  private final int pageSize;
 
   private CommentsResponse lastResponse;
 
@@ -37,12 +36,12 @@ public class YoutubeRepliesApi {
   public YoutubeRepliesApi(
       String apiKey, String baseUrl,
       Set<CommentRequestPart> parts, String parentId,
-      int maxResults) {
+      int pageSize) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
     this.parentId = parentId;
-    this.maxResults = maxResults;
+    this.pageSize = pageSize;
     this.lastResponse = null;
 
     this.totalTopLevelCommentCount = 0;
@@ -57,8 +56,8 @@ public class YoutubeRepliesApi {
     return totalCommentCount;
   }
 
-  public int getMaxResults() {
-    return maxResults;
+  public int getPageSize() {
+    return pageSize;
   }
 
   public List<Comment> requestNextPage() {
@@ -102,7 +101,7 @@ public class YoutubeRepliesApi {
     Map<String, List<String>> queries = new HashMap<>();
     queries.put("part", parts.stream().map(CommentRequestPart::getPart).toList());
     queries.put("parentId", List.of(parentId));
-    queries.put("maxResults", List.of(String.valueOf(maxResults)));
+    queries.put("maxResults", List.of(String.valueOf(pageSize)));
     queries.put("key", List.of(apiKey));
 
     String nextPageToken = extractNextPageToken();
