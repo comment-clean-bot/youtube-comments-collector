@@ -25,6 +25,7 @@ public class YoutubeCommentListApi {
   private final Set<CommentThreadRequestPart> parts;
   private final String videoId;
   private final int pageSize;
+  private final Integer maxResults;
 
   private final ReplyCollector replyCollector;
 
@@ -42,9 +43,27 @@ public class YoutubeCommentListApi {
     this.parts = new HashSet<>(parts);
     this.videoId = videoId;
     this.pageSize = pageSize;
-    this.lastResponse = null;
+    this.maxResults = null;
     this.replyCollector = replyCollector;
 
+    this.lastResponse = null;
+    this.totalTopLevelCommentCount = 0;
+    this.totalCommentCount = 0;
+  }
+
+  public YoutubeCommentListApi(
+      String apiKey, String baseUrl,
+      Set<CommentThreadRequestPart> parts, String videoId,
+      int pageSize, int maxResults, ReplyCollector replyCollector) {
+    this.apiKey = apiKey;
+    this.baseUrl = baseUrl;
+    this.parts = new HashSet<>(parts);
+    this.videoId = videoId;
+    this.pageSize = pageSize;
+    this.maxResults = maxResults;
+    this.replyCollector = replyCollector;
+
+    this.lastResponse = null;
     this.totalTopLevelCommentCount = 0;
     this.totalCommentCount = 0;
   }
@@ -89,7 +108,7 @@ public class YoutubeCommentListApi {
     if (lastResponse == null) {
       return true;
     }
-    return !extractNextPageToken().isEmpty();
+    return !extractNextPageToken().isEmpty() && leftResultsCount() > 0;
   }
 
   private Map<String, String> makeHeaders() {
@@ -103,7 +122,7 @@ public class YoutubeCommentListApi {
     Map<String, List<String>> queries = new HashMap<>();
     queries.put("part", parts.stream().map(CommentThreadRequestPart::getPart).toList());
     queries.put("videoId", List.of(videoId));
-    queries.put("maxResults", List.of(String.valueOf(pageSize)));
+    queries.put("maxResults", List.of(String.valueOf(Integer.min(pageSize, leftResultsCount()))));
     queries.put("key", List.of(apiKey));
 
     String nextPageToken = extractNextPageToken();
@@ -112,6 +131,13 @@ public class YoutubeCommentListApi {
     }
 
     return queries;
+  }
+
+  private int leftResultsCount() {
+    if (maxResults == null) {
+      return Integer.MAX_VALUE;
+    }
+    return maxResults - totalTopLevelCommentCount;
   }
 
   private String extractNextPageToken() {

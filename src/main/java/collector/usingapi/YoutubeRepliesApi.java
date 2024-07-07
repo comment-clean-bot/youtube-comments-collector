@@ -27,11 +27,11 @@ public class YoutubeRepliesApi {
   private final Set<CommentRequestPart> parts;
   private final String parentId;
   private final int pageSize;
+  private final Integer maxResults;
 
   private CommentsResponse lastResponse;
 
-  private int totalTopLevelCommentCount;
-  private int totalCommentCount;
+  private int totalRepliesCount;
 
   public YoutubeRepliesApi(
       String apiKey, String baseUrl,
@@ -42,18 +42,29 @@ public class YoutubeRepliesApi {
     this.parts = new HashSet<>(parts);
     this.parentId = parentId;
     this.pageSize = pageSize;
+    this.maxResults = null;
+
     this.lastResponse = null;
-
-    this.totalTopLevelCommentCount = 0;
-    this.totalCommentCount = 0;
+    this.totalRepliesCount = 0;
   }
 
-  public int getTotalTopLevelCommentCount() {
-    return totalTopLevelCommentCount;
+  public YoutubeRepliesApi(
+      String apiKey, String baseUrl,
+      Set<CommentRequestPart> parts, String parentId,
+      int pageSize, int maxResults) {
+    this.apiKey = apiKey;
+    this.baseUrl = baseUrl;
+    this.parts = new HashSet<>(parts);
+    this.parentId = parentId;
+    this.pageSize = pageSize;
+    this.lastResponse = null;
+    this.maxResults = maxResults;
+
+    this.totalRepliesCount = 0;
   }
 
-  public int getTotalCommentCount() {
-    return totalCommentCount;
+  public int getTotalRepliesCount() {
+    return totalRepliesCount;
   }
 
   public int getPageSize() {
@@ -78,8 +89,7 @@ public class YoutubeRepliesApi {
         CommentResponse::toComment
     ).collect(Collectors.toList());
 
-    totalTopLevelCommentCount += extractTotalResults();
-    totalCommentCount += collectedComments.size();
+    totalRepliesCount += collectedComments.size();
     return collectedComments;
   }
 
@@ -87,7 +97,14 @@ public class YoutubeRepliesApi {
     if (lastResponse == null) {
       return true;
     }
-    return !extractNextPageToken().isEmpty();
+    return !extractNextPageToken().isEmpty() && leftResultsCount() > 0;
+  }
+
+  private int leftResultsCount() {
+    if (maxResults == null) {
+      return Integer.MAX_VALUE;
+    }
+    return maxResults - totalRepliesCount;
   }
 
   private Map<String, String> makeHeaders() {
@@ -101,7 +118,7 @@ public class YoutubeRepliesApi {
     Map<String, List<String>> queries = new HashMap<>();
     queries.put("part", parts.stream().map(CommentRequestPart::getPart).toList());
     queries.put("parentId", List.of(parentId));
-    queries.put("maxResults", List.of(String.valueOf(pageSize)));
+    queries.put("maxResults", List.of(String.valueOf(Integer.min(pageSize, leftResultsCount()))));
     queries.put("key", List.of(apiKey));
 
     String nextPageToken = extractNextPageToken();
@@ -117,13 +134,6 @@ public class YoutubeRepliesApi {
       return "";
     }
     return lastResponse.getNextPageToken();
-  }
-
-  private int extractTotalResults() {
-    if (lastResponse == null) {
-      return 0;
-    }
-    return lastResponse.getPageInfo().getTotalResults();
   }
 
   private static ObjectMapper initObjectMapper() {

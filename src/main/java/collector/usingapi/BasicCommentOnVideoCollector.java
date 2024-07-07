@@ -13,17 +13,17 @@ public class BasicCommentOnVideoCollector implements CommentOnVideoCollector {
   private final String apiKey;
   private final String baseUrl;
   private final int pageSize;
-  private final int maxPageCount;
+  private final int maxResults;
 
   private final ReplyCollector replyCollector;
 
   public BasicCommentOnVideoCollector(String apiKey, String baseUrl,
-      int pageSize, int maxPageCount,
+      int pageSize, int maxResults,
       ReplyCollector replyCollector) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.pageSize = pageSize;
-    this.maxPageCount = maxPageCount;
+    this.maxResults = maxResults;
     this.replyCollector = replyCollector;
   }
 
@@ -41,17 +41,15 @@ public class BasicCommentOnVideoCollector implements CommentOnVideoCollector {
             CommentThreadRequestPart.REPLY),
         video.id(),
         pageSize,
+        maxResults,
         replyCollector
     );
 
     List<Comment> output = new ArrayList<>();
-    int collectedPageCount = 0;
     int collectedCommentCount = 0; // need to be erased
     int collectedTopLevelCommentCount = 0; // need to be erased
     while (youtubeCommentListApi.hasNextPage()) {
-      if (maxPageCount > 0 && collectedPageCount >= maxPageCount) break;
       output.addAll(youtubeCommentListApi.requestNextPage());
-      collectedPageCount += 1;
       collectedCommentCount = youtubeCommentListApi.getTotalCommentCount(); // need to be erased
       collectedTopLevelCommentCount = youtubeCommentListApi.getTotalTopLevelCommentCount(); // need to be erased
     }

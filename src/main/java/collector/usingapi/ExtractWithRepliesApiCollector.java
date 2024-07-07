@@ -15,14 +15,14 @@ public class ExtractWithRepliesApiCollector implements ReplyCollector {
   private final String apiKey;
   private final String baseUrl;
   private final int pageSize;
-  private final int maxPageCount;
+  private final int maxResults;
 
   public ExtractWithRepliesApiCollector(String apiKey, String baseUrl,
-      int pageSize, int maxPageCount) {
+      int pageSize, int maxResults) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.pageSize = pageSize;
-    this.maxPageCount = maxPageCount;
+    this.maxResults = maxResults;
   }
 
   @Override
@@ -40,15 +40,13 @@ public class ExtractWithRepliesApiCollector implements ReplyCollector {
         baseUrl,
         Set.of(CommentRequestPart.ID, CommentRequestPart.SNIPPET),
         commentThread.getSnippet().getTopLevelComment().getId(),
-        pageSize
+        pageSize,
+        maxResults
     );
 
     List<Comment> output = new ArrayList<>();
-    int collectedPageCount = 0;
     while (youtubeRepliesApi.hasNextPage()) {
-      if (maxPageCount > 0 && collectedPageCount >= maxPageCount) break;
       output.addAll(youtubeRepliesApi.requestNextPage());
-      collectedPageCount += 1;
     }
 
     return output.stream();

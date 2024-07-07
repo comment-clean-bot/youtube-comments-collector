@@ -33,14 +33,14 @@ public class CollectCommentsOnVideoCommand implements Runnable {
   @Option(names = "--comment-page-size", description = "The number of comments to request per page", defaultValue = "100")
   private int commentPageSize;
 
-  @Option(names = "--comment-max-page-count", description = "The number of pages on collecting comments. If this value is set below zero, collect all pages.", defaultValue = "0")
-  private int commentMaxPageCount;
+  @Option(names = "--comment-max-results", description = "The maximum number of top level comments to collect. If this value is set below zero, collect all pages.", defaultValue = "0")
+  private int commentMaxResults;
 
   @Option(names = "--reply-page-size", description = "The number of replies to request per page", defaultValue = "100")
   private int replyPageSize;
 
-  @Option(names = "--reply-max-page-count", description = "The number of pages on collecting replies. If this value is set below zero, collect all pages.", defaultValue = "0")
-  private int replyMaxPageCount;
+  @Option(names = "--reply-max-results", description = "The maximum number of replies to collect. If this value is set below zero, collect all pages.", defaultValue = "0")
+  private int replyMaxResults;
 
   public static void main(String[] args) {
     String resourcePath = "src/main/resources/secrets/youtubeapi.properties";
@@ -61,11 +61,11 @@ public class CollectCommentsOnVideoCommand implements Runnable {
   public void run() {
     String baseUrl = "https://www.googleapis.com/youtube/v3";
     ReplyCollector replyCollector = collectAllReplies ?
-        new ExtractWithRepliesApiCollector(apiKey, baseUrl, replyPageSize, replyMaxPageCount) :
+        new ExtractWithRepliesApiCollector(apiKey, baseUrl, replyPageSize, replyMaxResults) :
         new ExtractOnResponseReplyCollector();
 
     CommentOnVideoCollector commentCollector = new BasicCommentOnVideoCollector(
-        apiKey, baseUrl, commentPageSize, commentMaxPageCount, replyCollector);
+        apiKey, baseUrl, commentPageSize, commentMaxResults, replyCollector);
 
     Video targetVideo = new Video(videoId, LocalDateTime.now(), "", "", "", "");
 
