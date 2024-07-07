@@ -54,7 +54,7 @@ class YoutubeCommentListApiTest {
             CommentThreadRequestPart.REPLY),
         "x_y4pWtGn8I",
         50,
-        new ExtractWithRepliesApiCollector(apiKey, BASE_URL)
+        new ExtractWithRepliesApiCollector(apiKey, BASE_URL, 100, 0)
     );
     while (youtubeCommentListApi.hasNextPage()) {
       youtubeCommentListApi.requestNextPage().forEach(System.out::println);
