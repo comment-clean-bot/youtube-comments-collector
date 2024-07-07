@@ -22,6 +22,11 @@ public class ListContainer implements ICommentsContainer {
   }
 
   @Override
+  public void addDatas(List<Comment> newComments) {
+    data.addAll(newComments);
+  }
+
+  @Override
   public void flush() {
     data.forEach(processor::commitData);
     data.clear();

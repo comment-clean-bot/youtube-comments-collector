@@ -1,5 +1,7 @@
 package core;
 
+import java.util.List;
+
 /**
  * Interface for a container that holds comments during collecting like buffer.
  * Use flush() to commit the comments to the storage and clear the container.
@@ -11,6 +13,8 @@ package core;
 public interface ICommentsContainer {
 
   void addData(Comment newComment);
+
+  void addDatas(List<Comment> newComments);
 
   void flush();
 }

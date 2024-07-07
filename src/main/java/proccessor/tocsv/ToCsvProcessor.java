@@ -11,7 +11,7 @@ public class ToCsvProcessor implements ICommentProcessor {
 
   private final String filePath;
 
-  ToCsvProcessor(String filePath) {
+  public ToCsvProcessor(String filePath) {
     this.filePath = filePath;
   }
 
