@@ -27,8 +27,6 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
 
   private static String apiKey;
 
-  private static String videoApiKey;
-
   @Parameters(index = "0", description = "The file path to save the comments")
   private String filePath;
 
@@ -62,7 +60,6 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
       Properties p = new Properties();
       p.load(file);
       apiKey = p.getProperty("key", "");
-      videoApiKey = p.getProperty("videoKey", "");
     } catch (Exception e) {
       System.out.println("cannot read properties file");
     }
@@ -80,7 +77,7 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
     ICommentsContainer listContainer = new ListContainer(processor);
     // Collect popular videos
     PopularVideoSelector popularVideoSelector = new PopularVideoSelector(
-        videoApiKey, baseUrl, videoPageSize, videoMaxResults, offMusicCategory
+        apiKey, baseUrl, videoPageSize, videoMaxResults, offMusicCategory
     );
     Stream<Video> popularVideos = popularVideoSelector.select();
 
