@@ -31,7 +31,7 @@ public class PopularVideoCommand implements Runnable {
     try (FileReader file = new FileReader(resourcePath)) {
       Properties p = new Properties();
       p.load(file);
-      apiKey = p.getProperty("videoKey", "");
+      apiKey = p.getProperty("key", "");
     } catch (Exception e) {
       System.out.println("cannot read properties file");
     }
@@ -44,7 +44,7 @@ public class PopularVideoCommand implements Runnable {
   @Override
   public void run() {
     String baseUrl = "https://www.googleapis.com/youtube/v3";
-    System.out.println("Collecting top 200 popular videos");
+
     PopularVideoSelector popularVideoSelector = new PopularVideoSelector(apiKey, baseUrl, pageSize,totalMaxCount,offMusicCategory);
     Stream<Video> popularVideos = popularVideoSelector.select();
     popularVideos.forEach(System.out::println);

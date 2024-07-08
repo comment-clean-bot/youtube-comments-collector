@@ -23,7 +23,7 @@ public class YoutubeVideoListApiTest {
     try (FileReader file = new FileReader(keyPath)) {
       Properties p = new Properties();
       p.load(file);
-      apiKey = p.getProperty("videoKey", "");
+      apiKey = p.getProperty("key", "");
     } catch (Exception e) {
       System.out.println("cannot read properties file");
     }
