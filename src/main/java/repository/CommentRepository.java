@@ -11,7 +11,5 @@ public interface CommentRepository {
   List<Comment> findByVideoId(String videoId);
   List<Comment> findByChannelId(String channelId);
   Optional<Comment> findByCommentId(String commentId);
-
-  //arg를 포함하는 모든 commentId에 해당하는 comment 리스트를 반환
-  List<Comment> findByCommentIdLike(String commentId);
+  List<Comment> findByParentId(String parentId);
 }
