@@ -13,5 +13,5 @@ public interface CommentRepository {
   Optional<Comment> findByCommentId(String commentId);
 
   //arg를 포함하는 모든 commentId에 해당하는 comment 리스트를 반환
-  List<Comment> findByIncludeCommentId(String commentId);
+  List<Comment> findByCommentIdLike(String commentId);
 }
