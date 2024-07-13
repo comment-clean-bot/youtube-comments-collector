@@ -1,6 +1,8 @@
 package database.SQLite;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -13,19 +15,19 @@ public class DDLService extends SQLiteManager{
 
   public QueryResult executeQuery(final String query) throws SQLException {
     Connection conn = null;
-    QueryResult result = null;
+    QueryResult result = QueryResult.FAILURE;
     Statement stmt = null;
 
     try{
-      conn = ensureConnection();
+      conn = getConnection();
       stmt = conn.createStatement();
       stmt.execute(query);
       result = QueryResult.SUCCESS;
+      conn.commit();
     } catch (SQLException e) {
       e.printStackTrace();
-      if (conn != null) {
-        conn.rollback();
-      }
+      conn.rollback();
+
       result = QueryResult.FAILURE;
     } finally {
       if (stmt != null) {
@@ -36,10 +38,11 @@ public class DDLService extends SQLiteManager{
   }
 
   public boolean checkTableExists(String tableName) throws SQLException {
-    if (executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" + tableName + "'").equals(QueryResult.SUCCESS)) {
-      return true;
-    }
-    return false;
+    Connection conn = getConnection();
+    DatabaseMetaData meta = conn.getMetaData();
+    ResultSet tables = meta.getTables(null, null, tableName, null);
+
+    return ( tables.next() ? tables.getRow() != 0 : false );
   }
 
   public QueryResult createTable(String tableName, String columns) throws SQLException {
@@ -53,6 +56,6 @@ public class DDLService extends SQLiteManager{
     if (!checkTableExists(tableName)) {
       return QueryResult.WARNING;
     }
-    return executeQuery("DROP TABLE " + tableName);
+    return executeQuery("DROP TABLE IF EXISTS " + tableName);
   }
 }

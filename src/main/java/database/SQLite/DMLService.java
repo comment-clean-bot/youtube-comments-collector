@@ -29,7 +29,7 @@ public class DMLService extends SQLiteManager{
   }
 
   public int insertCollectedComment(CollectedComment comment) throws SQLException {
-    String query = "INSERT INTO comments (channel_id, parent_id, text, author_id, like_count, published_at, updated_at, comment_type) VALUES ("
+    String query = "INSERT INTO collected_comment (channel_id, parent_id, text, author_id, like_count, published_at, updated_at, comment_type, comment_id) VALUES ("
         + "'" + comment.getChannelId() + "', "
         + "'" + comment.getParentId() + "', "
         + "'" + comment.getText() + "', "
@@ -37,9 +37,11 @@ public class DMLService extends SQLiteManager{
         + comment.getLikeCount() + ", "
         + "'" + DATE_FORMAT.format(comment.getPublishedAt()) + "', "
         + "'" + DATE_FORMAT.format(comment.getUpdatedAt()) + "', "
-        + "'" + comment.getCommentType().name() + "'"
+        + "'" + comment.getCommentType().name() + "', "
+        + "'" + comment.getCommentId() + "'"
         + ")";
-    Connection conn = ensureConnection();
+
+    Connection conn = getConnection();
     PreparedStatement pstmt = null;
 
     int inserted = 0;
@@ -88,7 +90,7 @@ public class DMLService extends SQLiteManager{
     query.append("AND comment_type = ?");
 
     final String finalQuery = query.toString();
-    Connection conn = ensureConnection();
+    Connection conn = getConnection();
     PreparedStatement pstmt = null;
 
     int updated = 0;
@@ -100,7 +102,7 @@ public class DMLService extends SQLiteManager{
       }
       pstmt.setString(i++, comment.getChannelId());
       pstmt.setString(i++, comment.getParentId());
-      pstmt.setString(i++, comment.getId());
+      pstmt.setString(i++, Integer.toString(comment.getId()));
       pstmt.setString(i, comment.getCommentType().name());
 
       pstmt.executeUpdate();
@@ -128,7 +130,7 @@ public class DMLService extends SQLiteManager{
 
   public int deleteCollectedComment(String fieldName, String fieldValue) throws SQLException {
     final String query = "DELETE FROM collected_comment WHERE " + fieldName + " = '" + fieldValue + "'";
-    Connection conn = ensureConnection();
+    Connection conn = getConnection();
     PreparedStatement pstmt = null;
 
     int deleted = 0;
@@ -155,8 +157,8 @@ public class DMLService extends SQLiteManager{
 
   public int insertCollectedComments(List<CollectedComment> comments) {
     int inserted = 0;
-    final String query = "INSERT INTO collected_comment (channel_id, parent_id, text, author_id, like_count, published_at, updated_at, comment_type) VALUES (?,?,?,?,?,?,?,?)";
-    Connection conn = ensureConnection();
+    final String query = "INSERT INTO collected_comment (channel_id, parent_id, text, author_id, like_count, published_at, updated_at, comment_type, comment_id) VALUES (?,?,?,?,?,?,?,?,?)";
+    Connection conn = getConnection();
     PreparedStatement pstmt = null;
 
     try {
@@ -170,6 +172,7 @@ public class DMLService extends SQLiteManager{
         pstmt.setString(6, DATE_FORMAT.format(comment.getPublishedAt()));
         pstmt.setString(7, DATE_FORMAT.format(comment.getUpdatedAt()));
         pstmt.setString(8, comment.getCommentType().name());
+        pstmt.setString(9, comment.getCommentId());
 
         pstmt.addBatch();
 

@@ -22,13 +22,13 @@ public class DQLService extends SQLiteManager{
   }
 
   public List<CollectedComment> selectCollectedCommentsWithFields(String fieldName, String fieldValue) {
-    final String query = "SELECT C1.id, C1.channel_id, C1.parent_id, C1.text, C1.author_id, C1.like_count, C1.published_at, C1.updated_at, C1.comment_type "
+    final String query = "SELECT C1.id, C1.channel_id, C1.parent_id, C1.text, C1.author_id, C1.like_count, C1.published_at, C1.updated_at, C1.comment_type, C1.comment_id "
         + " FROM collected_comment C1 "
-        + "WHERE 1=1 AND"
+        + "WHERE 1=1 AND "
         + fieldName + " = '" + fieldValue + "'";
     final List<CollectedComment> selected = new ArrayList<>();
 
-    Connection conn = ensureConnection();
+    Connection conn = getConnection();
     PreparedStatement pstmt = null;
     ResultSetMetaData meta;
 

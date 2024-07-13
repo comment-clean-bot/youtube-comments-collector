@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class SQLiteManager {
   private static final String SQLITE_JDBC_DRIVER = "org.sqlite.JDBC";
-  private static final String SQLITE_FILE_DB_URL = "jdbc:sqlite:comment.db";
+  private static final String SQLITE_FILE_DB_URL = "jdbc:sqlite:comment.sqlite";
 
   private static final boolean OPT_AUTO_COMMIT = false;
   private static final int OPT_VALID_TIMEOUT = 500;
@@ -85,6 +85,9 @@ public class SQLiteManager {
   }
 
   public Connection getConnection() {
+    if (this.conn == null) {
+      return createConnection();
+    }
     return this.conn;
   }
 }
