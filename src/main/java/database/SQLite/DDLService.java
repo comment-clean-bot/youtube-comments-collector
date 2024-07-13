@@ -4,10 +4,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class SQLiteDDLService extends SQLiteManager{
-  public SQLiteDDLService (){
+public class DDLService extends SQLiteManager{
+  public DDLService(){
   }
-  public SQLiteDDLService (String dbPath){
+  public DDLService(String dbPath){
     super(dbPath);
   }
 

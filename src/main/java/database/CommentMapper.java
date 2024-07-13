@@ -1,10 +1,9 @@
 package database;
 
 import core.Comment;
-import database.SQLite.SQLiteDMLService;
+import database.SQLite.DMLService;
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Map;
 
 public class CommentMapper {
@@ -29,8 +28,8 @@ public class CommentMapper {
       (String) objectMap.get("text"),
       (String) objectMap.get("author_id"),
       (long) objectMap.get("like_count"),
-      LocalDateTime.parse((String) objectMap.get("published_at"), SQLiteDMLService.DATE_FORMAT),
-      LocalDateTime.parse((String) objectMap.get("updated_at"), SQLiteDMLService.DATE_FORMAT),
+      LocalDateTime.parse((String) objectMap.get("published_at"), DMLService.DATE_FORMAT),
+      LocalDateTime.parse((String) objectMap.get("updated_at"), DMLService.DATE_FORMAT),
       CommentType.valueOf((String) objectMap.get("comment_type"))
     );
   }
