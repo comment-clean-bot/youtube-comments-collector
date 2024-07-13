@@ -1,5 +1,7 @@
 package database.SQLite;
 
+import java.io.File;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,11 @@ public class DDLServiceTest {
     }
   }
 
+  @AfterAll
+  public static void afterAll() {
+    File file = new File("./test.db");
+    file.delete();
+  }
   @Test
   public void 테이블_생성() {
     try {
