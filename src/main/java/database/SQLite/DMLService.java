@@ -68,7 +68,7 @@ public class DMLService extends SQLiteManager{
   }
 
   public int updateCollectedComments(CollectedComment comment, Map<String,Object> updateField){
-    final StringBuilder query = new StringBuilder("UPDATE collected_comment SET \n");
+    final StringBuilder query = new StringBuilder("UPDATE collected_comment \n");
     final List<String> updateSeq = new ArrayList<>();
     updateField.put("updated_at", DATE_FORMAT.format(LocalDateTime.now()));
 
@@ -84,29 +84,23 @@ public class DMLService extends SQLiteManager{
         })
     );
     query.append("WHERE 1 = 1 \n");
-    query.append("AND channel_id = ?");
-    query.append("AND parent_id = ?");
-    query.append("AND comment_id = ?");
-    query.append("AND comment_type = ?");
+    query.append("AND id = ? ");
 
     final String finalQuery = query.toString();
     Connection conn = getConnection();
     PreparedStatement pstmt = null;
 
     int updated = 0;
+
     try {
       pstmt = conn.prepareStatement(finalQuery);
       int i = 1;
       for (String key : updateSeq) {
         pstmt.setObject(i++, updateField.get(key));
       }
-      pstmt.setString(i++, comment.getChannelId());
-      pstmt.setString(i++, comment.getParentId());
-      pstmt.setString(i++, Integer.toString(comment.getId()));
-      pstmt.setString(i, comment.getCommentType().name());
+      pstmt.setString(i, Integer.toString(comment.getId()));
 
-      pstmt.executeUpdate();
-      updated += pstmt.getUpdateCount();
+      updated = pstmt.executeUpdate();
       conn.commit();
     } catch (SQLException e) {
       e.printStackTrace();
