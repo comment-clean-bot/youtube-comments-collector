@@ -2,7 +2,6 @@ package collector.usingapi;
 
 import collector.usingapi.requestvo.CommentRequestPart;
 import collector.usingapi.responsevo.CommentThreadResponse;
-import collector.usingapi.responsevo.CommentThreadsResponse;
 import core.Comment;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +25,8 @@ public class ExtractWithRepliesApiCollector implements ReplyCollector {
   }
 
   @Override
-  public List<Comment> collectReplies(CommentThreadsResponse commentThreads) {
-    return commentThreads.getItems().stream().flatMap(this::extractReplies).collect(
-        Collectors.toList());
+  public List<Comment> collectReplies(CommentThreadResponse commentThread) {
+    return extractReplies(commentThread).collect(Collectors.toList());
   }
 
   private Stream<Comment> extractReplies(CommentThreadResponse commentThread) {
