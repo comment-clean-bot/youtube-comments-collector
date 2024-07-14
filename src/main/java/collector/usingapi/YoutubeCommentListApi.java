@@ -78,10 +78,12 @@ public class YoutubeCommentListApi {
       e.printStackTrace();
     }
 
-    List<Comment> collectedComments = lastResponse.getItems().stream().map(
-        item -> item.getSnippet().getTopLevelComment().toComment()
-    ).collect(Collectors.toList());
-    collectedComments.addAll(replyCollector.collectReplies(lastResponse));
+    List<Comment> collectedComments = lastResponse.getItems().stream().flatMap(item -> {
+      List<Comment> output = new ArrayList<>();
+      output.add(item.getSnippet().getTopLevelComment().toComment());
+      output.addAll(replyCollector.collectReplies(item));
+      return output.stream();
+    }).collect(Collectors.toList());
 
     totalTopLevelCommentCount += extractTotalResults();
     totalCommentCount += collectedComments.size();
