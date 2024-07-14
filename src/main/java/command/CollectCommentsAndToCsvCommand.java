@@ -1,6 +1,7 @@
 package command;
 
 import collector.usingapi.AllPassCommentFilter;
+import collector.usingapi.AllPassVideoFilter;
 import collector.usingapi.BasicCommentOnVideoCollector;
 import collector.usingapi.CommentOnVideoCollector;
 import collector.usingapi.ExtractOnResponseReplyCollector;
@@ -78,7 +79,7 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
     ICommentsContainer listContainer = new ListContainer(processor);
     // Collect popular videos
     PopularVideoSelector popularVideoSelector = new PopularVideoSelector(
-        apiKey, baseUrl, videoPageSize, videoMaxResults, offMusicCategory
+        apiKey, baseUrl, videoPageSize, videoMaxResults, offMusicCategory, new AllPassVideoFilter()
     );
     Stream<Video> popularVideos = popularVideoSelector.select();
 

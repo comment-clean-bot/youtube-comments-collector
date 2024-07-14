@@ -39,7 +39,8 @@ public class YoutubeVideoListApiTest {
         "KR",
         50,
         200,
-        false
+        false,
+        new AllPassVideoFilter()
     );
     List<Video> output = new ArrayList<>();
     while (youtubeVideoListApi.hasNextPage()) {
@@ -60,7 +61,8 @@ public class YoutubeVideoListApiTest {
         "KR",
         50,
         200,
-        true
+        true,
+        new AllPassVideoFilter()
     );
     List<Video> output = new ArrayList<>();
     while (youtubeVideoListApi.hasNextPage()) {
@@ -71,7 +73,7 @@ public class YoutubeVideoListApiTest {
     Assertions.assertTrue(output.size() > 0);
 
     for (Video video : output) {
-      Assertions.assertFalse(video.categoryId().equals("10"));
+      Assertions.assertNotEquals("10", video.categoryId());
     }
 
   }

@@ -1,6 +1,7 @@
 package collector.usingapi;
 
 import collector.usingapi.requestvo.VideoRequestPart;
+import collector.usingapi.responsevo.VideoResponse;
 import collector.usingapi.responsevo.VideosResponse;
 import collector.usingapi.utils.HttpRequestApiManage;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,6 +33,7 @@ public class YoutubeVideoListApi {
 
   private final boolean offMusicCategory;
 
+  private final IVideoFilter videoFilter;
 
   private VideosResponse lastResponse;
 
@@ -40,7 +42,8 @@ public class YoutubeVideoListApi {
   public YoutubeVideoListApi(
       String apiKey, String baseUrl,
       Set<VideoRequestPart> parts, String chart, String regionCode,
-      int maxResults, int totalMaxCount, boolean offMusicCategory) {
+      int maxResults, int totalMaxCount, boolean offMusicCategory,
+      IVideoFilter videoFilter) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
@@ -51,6 +54,7 @@ public class YoutubeVideoListApi {
     this.offMusicCategory = offMusicCategory;
     this.lastResponse = null;
     this.totalVideoCount = 0;
+    this.videoFilter = videoFilter;
   }
 
   public int getTotalVideoCount() {
@@ -73,11 +77,10 @@ public class YoutubeVideoListApi {
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-    List<Video> videos = lastResponse.getItems().stream().map(
-        item -> item.toVideo()
-    ).collect(Collectors.toList());
-
-    videos = videos.stream().filter(video -> !offMusicCategory || !video.categoryId().equals("10")).toList();
+    List<Video> videos = lastResponse.getItems().stream().map(VideoResponse::toVideo)
+        .filter(video -> !offMusicCategory || !video.categoryId().equals("10"))
+        .filter(videoFilter::isAcceptable)
+        .collect(Collectors.toList());
 
     totalVideoCount += extractTotalResults(videos);
 
