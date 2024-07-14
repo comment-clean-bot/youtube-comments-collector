@@ -1,4 +1,7 @@
-package collector.usingapi;
+package filter;
+
+import core.Video;
+import core.filter.IVideoFilter;
 
 public class AllPassVideoFilter implements IVideoFilter {
 

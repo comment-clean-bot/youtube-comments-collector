@@ -1,5 +1,6 @@
-package collector.usingapi;
+package collector.usingapi.api;
 
+import collector.usingapi.ReplyCollector;
 import collector.usingapi.requestvo.CommentThreadRequestPart;
 import collector.usingapi.responsevo.CommentThreadsResponse;
 import collector.usingapi.utils.HttpRequestApiManage;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import core.Comment;
+import core.filter.ICommentFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

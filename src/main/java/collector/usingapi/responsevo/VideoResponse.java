@@ -1,6 +1,6 @@
 package collector.usingapi.responsevo;
 
-import collector.usingapi.Video;
+import core.Video;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AccessLevel;
 import lombok.Getter;

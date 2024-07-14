@@ -1,5 +1,7 @@
-package collector.usingapi;
+package collector.usingapi.impl;
 
+import collector.usingapi.ReplyCollector;
+import collector.usingapi.api.YoutubeRepliesApi;
 import collector.usingapi.requestvo.CommentRequestPart;
 import collector.usingapi.responsevo.CommentThreadResponse;
 import core.Comment;

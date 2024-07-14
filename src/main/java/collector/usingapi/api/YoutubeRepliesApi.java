@@ -1,4 +1,4 @@
-package collector.usingapi;
+package collector.usingapi.api;
 
 import collector.usingapi.requestvo.CommentRequestPart;
 import collector.usingapi.responsevo.CommentResponse;

@@ -1,12 +1,16 @@
-package collector.usingapi;
+package collector.usingapi.impl;
 
+import collector.usingapi.TargetVideoSelector;
+import core.Video;
+import collector.usingapi.api.YoutubeVideoListApi;
 import collector.usingapi.requestvo.VideoRequestPart;
+import core.filter.IVideoFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class PopularVideoSelector implements TargetVideoSelector{
+public class PopularVideoSelector implements TargetVideoSelector {
   private final String apiKey;
 
   private final String baseUrl;

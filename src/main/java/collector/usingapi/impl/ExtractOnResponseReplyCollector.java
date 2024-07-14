@@ -1,5 +1,6 @@
-package collector.usingapi;
+package collector.usingapi.impl;
 
+import collector.usingapi.ReplyCollector;
 import collector.usingapi.responsevo.CommentResponse;
 import collector.usingapi.responsevo.CommentThreadResponse;
 import core.Comment;

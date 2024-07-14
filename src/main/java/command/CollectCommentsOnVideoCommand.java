@@ -1,12 +1,12 @@
 package command;
 
-import collector.usingapi.AllPassCommentFilter;
-import collector.usingapi.BasicCommentOnVideoCollector;
+import filter.AllPassCommentFilter;
+import collector.usingapi.impl.BasicCommentOnVideoCollector;
 import collector.usingapi.CommentOnVideoCollector;
-import collector.usingapi.ExtractOnResponseReplyCollector;
-import collector.usingapi.ExtractWithRepliesApiCollector;
+import collector.usingapi.impl.ExtractOnResponseReplyCollector;
+import collector.usingapi.impl.ExtractWithRepliesApiCollector;
 import collector.usingapi.ReplyCollector;
-import collector.usingapi.Video;
+import core.Video;
 import command.handler.BaseCommandHandler;
 import core.Comment;
 import java.io.FileReader;

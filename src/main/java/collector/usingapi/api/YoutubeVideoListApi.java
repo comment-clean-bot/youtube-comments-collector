@@ -1,5 +1,6 @@
-package collector.usingapi;
+package collector.usingapi.api;
 
+import core.Video;
 import collector.usingapi.requestvo.VideoRequestPart;
 import collector.usingapi.responsevo.VideoResponse;
 import collector.usingapi.responsevo.VideosResponse;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import core.filter.IVideoFilter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
