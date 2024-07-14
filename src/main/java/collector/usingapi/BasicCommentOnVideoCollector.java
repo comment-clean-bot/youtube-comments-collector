@@ -18,7 +18,7 @@ public class BasicCommentOnVideoCollector implements CommentOnVideoCollector {
   private final ReplyCollector replyCollector;
 
   public BasicCommentOnVideoCollector(String apiKey, String baseUrl,
-      int pageSize, int maxResults,
+      int pageSize, Integer maxResults,
       ReplyCollector replyCollector) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
