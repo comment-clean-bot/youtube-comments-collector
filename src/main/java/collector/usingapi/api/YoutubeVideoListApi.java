@@ -33,9 +33,7 @@ public class YoutubeVideoListApi {
 
   private final int totalMaxCount;
 
-  private final boolean offMusicCategory;
-
-  private final IVideoFilter videoFilter;
+  private final List<IVideoFilter> videoFilters;
 
   private VideosResponse lastResponse;
 
@@ -44,8 +42,8 @@ public class YoutubeVideoListApi {
   public YoutubeVideoListApi(
       String apiKey, String baseUrl,
       Set<VideoRequestPart> parts, String chart, String regionCode,
-      int maxResults, int totalMaxCount, boolean offMusicCategory,
-      IVideoFilter videoFilter) {
+      int maxResults, int totalMaxCount,
+      List<IVideoFilter> videoFilters) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
@@ -53,10 +51,9 @@ public class YoutubeVideoListApi {
     this.regionCode = regionCode;
     this.maxResults = maxResults;
     this.totalMaxCount = totalMaxCount;
-    this.offMusicCategory = offMusicCategory;
     this.lastResponse = null;
     this.totalVideoCount = 0;
-    this.videoFilter = videoFilter;
+    this.videoFilters = videoFilters;
   }
 
   public int getTotalVideoCount() {
@@ -80,8 +77,14 @@ public class YoutubeVideoListApi {
       e.printStackTrace();
     }
     List<Video> videos = lastResponse.getItems().stream().map(VideoResponse::toVideo)
-        .filter(video -> !offMusicCategory || !video.categoryId().equals("10"))
-        .filter(videoFilter::isAcceptable)
+        .filter(video -> {
+          for (IVideoFilter videoFilter : videoFilters) {
+            if (!videoFilter.isAcceptable(video)) {
+              return false;
+            }
+          }
+          return true;
+        })
         .collect(Collectors.toList());
 
     totalVideoCount += extractTotalResults(videos);

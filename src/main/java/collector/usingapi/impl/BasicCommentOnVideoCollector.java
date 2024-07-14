@@ -21,17 +21,17 @@ public class BasicCommentOnVideoCollector implements CommentOnVideoCollector {
   private final int maxResults;
 
   private final ReplyCollector replyCollector;
-  private final ICommentFilter commentFilter;
+  private final List<ICommentFilter> commentFilters;
 
   public BasicCommentOnVideoCollector(String apiKey, String baseUrl,
       int pageSize, Integer maxResults, ReplyCollector replyCollector,
-      ICommentFilter commentFilter) {
+      List<ICommentFilter> commentFilters) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.pageSize = pageSize;
     this.maxResults = maxResults;
     this.replyCollector = replyCollector;
-    this.commentFilter = commentFilter;
+    this.commentFilters = commentFilters;
   }
 
   @Override
@@ -50,7 +50,7 @@ public class BasicCommentOnVideoCollector implements CommentOnVideoCollector {
         pageSize,
         maxResults,
         replyCollector,
-        commentFilter
+        commentFilters
     );
 
     List<Comment> output = new ArrayList<>();

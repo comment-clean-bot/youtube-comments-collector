@@ -4,8 +4,8 @@ import collector.usingapi.api.YoutubeCommentListApi;
 import collector.usingapi.impl.ExtractOnResponseReplyCollector;
 import collector.usingapi.impl.ExtractWithRepliesApiCollector;
 import collector.usingapi.requestvo.CommentThreadRequestPart;
-import filter.AllPassCommentFilter;
 import java.io.FileReader;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,7 +41,7 @@ class YoutubeCommentListApiTest {
         50,
         null,
         new ExtractOnResponseReplyCollector(),
-        new AllPassCommentFilter()
+        List.of()
     );
     while (youtubeCommentListApi.hasNextPage()) {
       youtubeCommentListApi.requestNextPage().forEach(System.out::println);
@@ -62,7 +62,7 @@ class YoutubeCommentListApiTest {
         50,
         null,
         new ExtractWithRepliesApiCollector(apiKey, BASE_URL, 100, null),
-        new AllPassCommentFilter()
+        List.of()
     );
     while (youtubeCommentListApi.hasNextPage()) {
       youtubeCommentListApi.requestNextPage().forEach(System.out::println);
