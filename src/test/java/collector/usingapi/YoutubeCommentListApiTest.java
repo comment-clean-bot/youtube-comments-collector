@@ -35,6 +35,7 @@ class YoutubeCommentListApiTest {
             CommentThreadRequestPart.REPLY),
         "x_y4pWtGn8I",
         50,
+        null,
         new ExtractOnResponseReplyCollector()
     );
     while (youtubeCommentListApi.hasNextPage()) {
@@ -54,7 +55,8 @@ class YoutubeCommentListApiTest {
             CommentThreadRequestPart.REPLY),
         "x_y4pWtGn8I",
         50,
-        new ExtractWithRepliesApiCollector(apiKey, BASE_URL, 100, 0)
+        null,
+        new ExtractWithRepliesApiCollector(apiKey, BASE_URL, 100, null)
     );
     while (youtubeCommentListApi.hasNextPage()) {
       youtubeCommentListApi.requestNextPage().forEach(System.out::println);

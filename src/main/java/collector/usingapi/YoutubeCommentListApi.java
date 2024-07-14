@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import core.Comment;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,24 +38,7 @@ public class YoutubeCommentListApi {
   public YoutubeCommentListApi(
       String apiKey, String baseUrl,
       Set<CommentThreadRequestPart> parts, String videoId,
-      int pageSize, ReplyCollector replyCollector) {
-    this.apiKey = apiKey;
-    this.baseUrl = baseUrl;
-    this.parts = new HashSet<>(parts);
-    this.videoId = videoId;
-    this.pageSize = pageSize;
-    this.maxResults = null;
-    this.replyCollector = replyCollector;
-
-    this.lastResponse = null;
-    this.totalTopLevelCommentCount = 0;
-    this.totalCommentCount = 0;
-  }
-
-  public YoutubeCommentListApi(
-      String apiKey, String baseUrl,
-      Set<CommentThreadRequestPart> parts, String videoId,
-      int pageSize, int maxResults, ReplyCollector replyCollector) {
+      int pageSize, Integer maxResults, ReplyCollector replyCollector) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
@@ -105,10 +89,13 @@ public class YoutubeCommentListApi {
   }
 
   public boolean hasNextPage() {
+    if (leftResultsCount() <= 0) {
+      return false;
+    }
     if (lastResponse == null) {
       return true;
     }
-    return !extractNextPageToken().isEmpty() && leftResultsCount() > 0;
+    return !extractNextPageToken().isEmpty();
   }
 
   private Map<String, String> makeHeaders() {
