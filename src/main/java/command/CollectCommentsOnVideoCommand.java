@@ -1,5 +1,6 @@
 package command;
 
+import collector.usingapi.AllPassCommentFilter;
 import collector.usingapi.BasicCommentOnVideoCollector;
 import collector.usingapi.CommentOnVideoCollector;
 import collector.usingapi.ExtractOnResponseReplyCollector;
@@ -65,7 +66,8 @@ public class CollectCommentsOnVideoCommand implements Runnable {
         new ExtractOnResponseReplyCollector();
 
     CommentOnVideoCollector commentCollector = new BasicCommentOnVideoCollector(
-        apiKey, baseUrl, commentPageSize, commentMaxResults, replyCollector);
+        apiKey, baseUrl, commentPageSize, commentMaxResults,
+        replyCollector, new AllPassCommentFilter());
 
     Video targetVideo = new Video(videoId, LocalDateTime.now(), "", "", "", "");
 

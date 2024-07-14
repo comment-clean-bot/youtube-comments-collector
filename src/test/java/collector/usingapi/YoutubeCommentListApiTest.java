@@ -36,7 +36,8 @@ class YoutubeCommentListApiTest {
         "x_y4pWtGn8I",
         50,
         null,
-        new ExtractOnResponseReplyCollector()
+        new ExtractOnResponseReplyCollector(),
+        new AllPassCommentFilter()
     );
     while (youtubeCommentListApi.hasNextPage()) {
       youtubeCommentListApi.requestNextPage().forEach(System.out::println);
@@ -56,7 +57,8 @@ class YoutubeCommentListApiTest {
         "x_y4pWtGn8I",
         50,
         null,
-        new ExtractWithRepliesApiCollector(apiKey, BASE_URL, 100, null)
+        new ExtractWithRepliesApiCollector(apiKey, BASE_URL, 100, null),
+        new AllPassCommentFilter()
     );
     while (youtubeCommentListApi.hasNextPage()) {
       youtubeCommentListApi.requestNextPage().forEach(System.out::println);

@@ -1,5 +1,6 @@
 package command;
 
+import collector.usingapi.AllPassCommentFilter;
 import collector.usingapi.BasicCommentOnVideoCollector;
 import collector.usingapi.CommentOnVideoCollector;
 import collector.usingapi.ExtractOnResponseReplyCollector;
@@ -86,7 +87,8 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
         new ExtractOnResponseReplyCollector();
 
     CommentOnVideoCollector commentCollector = new BasicCommentOnVideoCollector(
-        apiKey, baseUrl, commentPageSize, commentMaxResults, replyCollector);
+        apiKey, baseUrl, commentPageSize, commentMaxResults,
+        replyCollector, new AllPassCommentFilter());
 
     popularVideos.forEach(video -> listContainer.addDatas(commentCollector.collectComments(video)));
 
