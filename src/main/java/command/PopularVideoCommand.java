@@ -1,8 +1,8 @@
 package command;
 
-import collector.usingapi.AllPassVideoFilter;
-import collector.usingapi.PopularVideoSelector;
-import collector.usingapi.Video;
+import filter.AllPassVideoFilter;
+import collector.usingapi.impl.PopularVideoSelector;
+import core.Video;
 import command.handler.BaseCommandHandler;
 import java.io.FileReader;
 import java.util.Properties;

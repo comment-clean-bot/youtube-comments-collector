@@ -1,6 +1,7 @@
-package collector.usingapi;
+package filter;
 
 import core.Comment;
+import core.filter.ICommentFilter;
 
 public class AllPassCommentFilter implements ICommentFilter {
 

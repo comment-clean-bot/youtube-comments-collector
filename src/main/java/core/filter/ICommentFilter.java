@@ -1,4 +1,4 @@
-package collector.usingapi;
+package core.filter;
 
 import core.Comment;
 

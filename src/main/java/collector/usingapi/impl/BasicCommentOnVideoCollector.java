@@ -1,7 +1,12 @@
-package collector.usingapi;
+package collector.usingapi.impl;
 
+import collector.usingapi.CommentOnVideoCollector;
+import collector.usingapi.ReplyCollector;
+import core.Video;
+import collector.usingapi.api.YoutubeCommentListApi;
 import collector.usingapi.requestvo.CommentThreadRequestPart;
 import core.Comment;
+import core.filter.ICommentFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
