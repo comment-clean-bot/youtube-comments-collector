@@ -1,19 +1,20 @@
 package command;
 
-import filter.AllPassCommentFilter;
-import filter.AllPassVideoFilter;
-import collector.usingapi.impl.BasicCommentOnVideoCollector;
 import collector.usingapi.CommentOnVideoCollector;
+import collector.usingapi.ReplyCollector;
+import collector.usingapi.impl.BasicCommentOnVideoCollector;
 import collector.usingapi.impl.ExtractOnResponseReplyCollector;
 import collector.usingapi.impl.ExtractWithRepliesApiCollector;
 import collector.usingapi.impl.PopularVideoSelector;
-import collector.usingapi.ReplyCollector;
-import core.Video;
 import command.handler.BaseCommandHandler;
 import container.ListContainer;
 import core.ICommentProcessor;
 import core.ICommentsContainer;
+import core.Video;
+import core.filter.IVideoFilter;
+import filter.OffMusicCategoryVideoFilter;
 import java.io.FileReader;
+import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
 import picocli.CommandLine;
@@ -77,9 +78,11 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
 
     ICommentProcessor processor = new ToCsvProcessor(filePath);
     ICommentsContainer listContainer = new ListContainer(processor);
+    List<IVideoFilter> videoFilters = offMusicCategory ? List.of(new OffMusicCategoryVideoFilter()) : List.of();
+
     // Collect popular videos
     PopularVideoSelector popularVideoSelector = new PopularVideoSelector(
-        apiKey, baseUrl, videoPageSize, videoMaxResults, offMusicCategory, new AllPassVideoFilter()
+        apiKey, baseUrl, videoPageSize, videoMaxResults, videoFilters
     );
     Stream<Video> popularVideos = popularVideoSelector.select();
 
@@ -89,7 +92,7 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
 
     CommentOnVideoCollector commentCollector = new BasicCommentOnVideoCollector(
         apiKey, baseUrl, commentPageSize, commentMaxResults,
-        replyCollector, new AllPassCommentFilter());
+        replyCollector, List.of());
 
     popularVideos.forEach(video -> listContainer.addDatas(commentCollector.collectComments(video)));
 

@@ -19,17 +19,14 @@ public class PopularVideoSelector implements TargetVideoSelector {
 
   private final int totalMaxCount;
 
-  private final boolean offMusicCategory;
+  private final List<IVideoFilter> videoFilters;
 
-  private final IVideoFilter videoFilter;
-
-  public PopularVideoSelector(String apiKey, String baseUrl, int maxResults, int totalMaxCount, boolean offMusicCategory, IVideoFilter videoFilter) {
+  public PopularVideoSelector(String apiKey, String baseUrl, int maxResults, int totalMaxCount, List<IVideoFilter> videoFilters) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.maxResults = maxResults;
     this.totalMaxCount = totalMaxCount;
-    this.offMusicCategory = offMusicCategory;
-    this.videoFilter = videoFilter;
+    this.videoFilters = videoFilters;
   }
 
   @Override
@@ -42,8 +39,7 @@ public class PopularVideoSelector implements TargetVideoSelector {
         "KR",
         maxResults,
         totalMaxCount,
-        offMusicCategory,
-        videoFilter
+        videoFilters
     );
 
     List<Video> output = new ArrayList<>();

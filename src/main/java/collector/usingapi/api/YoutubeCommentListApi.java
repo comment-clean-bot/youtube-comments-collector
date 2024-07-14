@@ -32,7 +32,7 @@ public class YoutubeCommentListApi {
   private final Integer maxResults;
 
   private final ReplyCollector replyCollector;
-  private final ICommentFilter commentFilter;
+  private final List<ICommentFilter> commentFilters;
 
   private CommentThreadsResponse lastResponse;
 
@@ -43,7 +43,7 @@ public class YoutubeCommentListApi {
       String apiKey, String baseUrl,
       Set<CommentThreadRequestPart> parts, String videoId,
       int pageSize, Integer maxResults, ReplyCollector replyCollector,
-      ICommentFilter commentFilter) {
+      List<ICommentFilter> commentFilters) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
@@ -51,7 +51,7 @@ public class YoutubeCommentListApi {
     this.pageSize = pageSize;
     this.maxResults = maxResults;
     this.replyCollector = replyCollector;
-    this.commentFilter = commentFilter;
+    this.commentFilters = commentFilters;
 
     this.lastResponse = null;
     this.totalTopLevelCommentCount = 0;
@@ -87,8 +87,10 @@ public class YoutubeCommentListApi {
     List<Comment> collectedComments = lastResponse.getItems().stream().flatMap(item -> {
       List<Comment> output = new ArrayList<>();
       Comment topLevelComment = item.getSnippet().getTopLevelComment().toComment();
-      if (!commentFilter.isAcceptable(topLevelComment)) {
-        return Stream.empty();
+      for (ICommentFilter filter : commentFilters) {
+        if (!filter.isAcceptable(topLevelComment)) {
+          return Stream.empty();
+        }
       }
 
       output.add(topLevelComment);

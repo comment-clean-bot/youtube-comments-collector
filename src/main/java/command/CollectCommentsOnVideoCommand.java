@@ -1,14 +1,13 @@
 package command;
 
-import filter.AllPassCommentFilter;
-import collector.usingapi.impl.BasicCommentOnVideoCollector;
 import collector.usingapi.CommentOnVideoCollector;
+import collector.usingapi.ReplyCollector;
+import collector.usingapi.impl.BasicCommentOnVideoCollector;
 import collector.usingapi.impl.ExtractOnResponseReplyCollector;
 import collector.usingapi.impl.ExtractWithRepliesApiCollector;
-import collector.usingapi.ReplyCollector;
-import core.Video;
 import command.handler.BaseCommandHandler;
 import core.Comment;
+import core.Video;
 import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -67,7 +66,7 @@ public class CollectCommentsOnVideoCommand implements Runnable {
 
     CommentOnVideoCollector commentCollector = new BasicCommentOnVideoCollector(
         apiKey, baseUrl, commentPageSize, commentMaxResults,
-        replyCollector, new AllPassCommentFilter());
+        replyCollector, List.of());
 
     Video targetVideo = new Video(videoId, LocalDateTime.now(), "", "", "", "");
 
