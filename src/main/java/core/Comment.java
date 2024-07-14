@@ -11,7 +11,12 @@ public record Comment(
     String author,
     long likeCount,
     LocalDateTime publishedAt,
-    LocalDateTime updatedAt
+    LocalDateTime updatedAt,
+    Boolean preLabel
 ) {
+
+  public Comment withPreLabel(boolean preLabel) {
+    return new Comment(id, channelId, videoId, parentId, text, author, likeCount, publishedAt, updatedAt, preLabel);
+  }
 
 }

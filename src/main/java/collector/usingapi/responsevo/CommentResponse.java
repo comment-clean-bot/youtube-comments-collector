@@ -32,7 +32,8 @@ public class CommentResponse extends YoutubeApiBaseResponse {
         snippet.getAuthorDisplayName(),
         snippet.getLikeCount(),
         snippet.getPublishedAt(),
-        snippet.getUpdatedAt()
+        snippet.getUpdatedAt(),
+        null
     );
   }
 }
