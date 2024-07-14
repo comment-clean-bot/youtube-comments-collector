@@ -1,5 +1,6 @@
 package command;
 
+import collector.usingapi.AllPassVideoFilter;
 import collector.usingapi.PopularVideoSelector;
 import collector.usingapi.Video;
 import command.handler.BaseCommandHandler;
@@ -45,7 +46,9 @@ public class PopularVideoCommand implements Runnable {
   public void run() {
     String baseUrl = "https://www.googleapis.com/youtube/v3";
 
-    PopularVideoSelector popularVideoSelector = new PopularVideoSelector(apiKey, baseUrl, pageSize,totalMaxCount,offMusicCategory);
+    PopularVideoSelector popularVideoSelector = new PopularVideoSelector(
+        apiKey, baseUrl, pageSize, totalMaxCount,
+        offMusicCategory, new AllPassVideoFilter());
     Stream<Video> popularVideos = popularVideoSelector.select();
     popularVideos.forEach(System.out::println);
 
