@@ -94,7 +94,6 @@ public class YoutubeCommentListApi {
       }
 
       output.add(topLevelComment);
-      output.add(item.getSnippet().getTopLevelComment().toComment());
       output.addAll(replyCollector.collectReplies(item));
       return output.stream();
     }).collect(Collectors.toList());
