@@ -22,6 +22,22 @@ public class CommentMapper {
     );
   }
 
+  public static CollectedComment toCollectedComment(Comment comment) {
+    return new CollectedComment(
+      0,
+      comment.channelId(),
+      comment.parentId(),
+      comment.text(),
+      comment.author(),
+      comment.likeCount(),
+      comment.publishedAt(),
+      comment.updatedAt(),
+      CommentType.YOUTUBE,
+      comment.id(),
+      comment.preLabel()
+    );
+  }
+
   public static CollectedComment objectToCollectedComment(Map<String, Object> objectMap)
       throws ParseException {
     return new CollectedComment(
