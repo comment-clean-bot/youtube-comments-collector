@@ -33,6 +33,7 @@ public class SQLiteManager {
 
       this.conn.setAutoCommit(OPT_AUTO_COMMIT);
 
+
     } catch (ClassNotFoundException | SQLException e) {
       e.printStackTrace();
     }

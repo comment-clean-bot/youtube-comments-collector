@@ -22,7 +22,7 @@ public class DQLService extends SQLiteManager{
   }
 
   public List<CollectedComment> selectCollectedCommentsWithFields(String fieldName, String fieldValue) {
-    final String query = "SELECT C1.id, C1.channel_id, C1.parent_id, C1.text, C1.author_id, C1.like_count, C1.published_at, C1.updated_at, C1.comment_type, C1.comment_id, C1.pre_label "
+    final String query = "SELECT C1.id, C1.channel_id, C1.parent_id, C1.text, C1.author_id, C1.like_count, C1.published_at, C1.updated_at, C1.comment_type, C1.comment_id, C1.pre_label, C1.video_id "
         + " FROM collected_comment C1 "
         + "WHERE 1=1 AND "
         + fieldName + " = '" + fieldValue + "'";
@@ -31,10 +31,10 @@ public class DQLService extends SQLiteManager{
     Connection conn = getConnection();
     PreparedStatement pstmt = null;
     ResultSetMetaData meta;
-
+    ResultSet rs = null;
     try {
       pstmt = conn.prepareStatement(query);
-      ResultSet rs = pstmt.executeQuery();
+      rs = pstmt.executeQuery();
       meta = rs.getMetaData();
       while (rs.next()) {
         Map<String, Object> row = new HashMap<>();
@@ -54,23 +54,30 @@ public class DQLService extends SQLiteManager{
           e.printStackTrace();
         }
       }
+      if (rs != null) {
+        try {
+          rs.close();
+        } catch(Exception e){
+          e.printStackTrace();
+        }
+      }
     }
 
     return selected;
   }
 
   public List<CollectedComment> selectAllCollectedComments() throws SQLException {
-    final String query = "SELECT C1.id, C1.channel_id, C1.parent_id, C1.text, C1.author_id, C1.like_count, C1.published_at, C1.updated_at, C1.comment_type, C1.comment_id, C1.pre_label "
+    final String query = "SELECT C1.id, C1.channel_id, C1.parent_id, C1.text, C1.author_id, C1.like_count, C1.published_at, C1.updated_at, C1.comment_type, C1.comment_id, C1.pre_label, C1.video_id "
         + " FROM collected_comment C1 ";
     final List<CollectedComment> selected = new ArrayList<>();
 
     Connection conn = getConnection();
     PreparedStatement pstmt = null;
     ResultSetMetaData meta;
-
+    ResultSet rs = null;
     try {
       pstmt = conn.prepareStatement(query);
-      ResultSet rs = pstmt.executeQuery();
+      rs = pstmt.executeQuery();
       meta = rs.getMetaData();
       while (rs.next()) {
         Map<String, Object> row = new HashMap<>();
@@ -86,6 +93,13 @@ public class DQLService extends SQLiteManager{
       if (pstmt != null) {
         try {
           pstmt.close();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+      if (rs != null) {
+        try {
+          rs.close();
         } catch (Exception e) {
           e.printStackTrace();
         }

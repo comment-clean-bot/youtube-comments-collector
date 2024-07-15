@@ -15,6 +15,7 @@ public class CollectedComment {
   private int id;
   private String channelId;
   private String parentId;
+  private String videoId;
   private String text;
   private String authorId;
   private long likeCount;
@@ -25,12 +26,8 @@ public class CollectedComment {
 
   private boolean preLabel;
 
-  public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
-  }
-
   public String toString(){
-    return "id: " + id + ", channelId: " + channelId + ", parentId: " + parentId + ", text: " + text + ", authorId: " + authorId + ", likeCount: " + likeCount + ", publishedAt: " + publishedAt + ", updatedAt: " + updatedAt + ", commentType: " + commentType + ", commentId: " + commentId;
+    return "id: " + id + ", channelId: " + channelId + ", parentId: " + parentId + ", videoId: " + videoId + ", text: " + text + ", authorId: " + authorId + ", likeCount: " + likeCount + ", publishedAt: " + publishedAt + ", updatedAt: " + updatedAt + ", commentType: " + commentType + ", commentId: " + commentId + ", preLabel: " + preLabel;
   }
 
   public Map<String, Object> toMap(List<String> fields) {
@@ -45,6 +42,9 @@ public class CollectedComment {
           break;
         case "parent_id":
           toReturn.put("parent_id", parentId);
+          break;
+        case "video_id":
+          toReturn.put("video_id", videoId);
           break;
         case "text":
           toReturn.put("text", text);

@@ -29,7 +29,7 @@ public class DMLService extends SQLiteManager{
   }
 
   public int insertCollectedComment(CollectedComment comment) throws SQLException {
-    String query = "INSERT INTO collected_comment (channel_id, parent_id, text, author_id, like_count, published_at, updated_at, comment_type, comment_id, pre_label) VALUES ("
+    String query = "INSERT INTO collected_comment (channel_id, parent_id, text, author_id, like_count, published_at, updated_at, comment_type, comment_id, pre_label,video_id) VALUES ("
         + "'" + comment.getChannelId() + "', "
         + "'" + comment.getParentId() + "', "
         + "'" + comment.getText() + "', "
@@ -39,7 +39,8 @@ public class DMLService extends SQLiteManager{
         + "'" + DATE_FORMAT.format(comment.getUpdatedAt()) + "', "
         + "'" + comment.getCommentType().name() + "', "
         + "'" + comment.getCommentId() + "', "
-        + (comment.isPreLabel() ? 1 : 0)
+        + (comment.isPreLabel() ? 1 : 0) + ", "
+        + "'" + comment.getVideoId() + "'"
         + ")";
 
     Connection conn = getConnection();
@@ -124,7 +125,7 @@ public class DMLService extends SQLiteManager{
   }
 
   public int updateCollectedComments(List<CollectedComment> comments) {
-    final String query = "UPDATE collected_comment SET text = ?, like_count = ?, updated_at = ?, pre_label = ? WHERE id = ?";
+    final String query = "UPDATE collected_comment SET text = ?, like_count = ?, pre_label = ?, updated_at = ? WHERE comment_id = ?";
     final List<String> updateSeq = new ArrayList<>(List.of("text", "like_count", "updated_at", "pre_label"));
     Connection conn = getConnection();
     PreparedStatement pstmt = null;
@@ -134,12 +135,27 @@ public class DMLService extends SQLiteManager{
       for (CollectedComment comment : comments) {
         final Map<String, Object> updateField = comment.toMap(List.of("text", "like_count", "pre_label"));
         updateField.put("updated_at", DATE_FORMAT.format(LocalDateTime.now()));
-        int i = 1;
+        System.out.println(updateField);
         for (String key : updateSeq) {
-          pstmt.setObject(i++, updateField.get(key));
+          switch (key) {
+            case "text":
+              pstmt.setString(1, (String) updateField.get(key));
+              break;
+            case "like_count":
+              pstmt.setLong(2, (long) updateField.get(key));
+              break;
+            case "pre_label":
+              pstmt.setInt(3, ((boolean) updateField.get(key)) ? 1 : 0);
+              break;
+            case "updated_at":
+              pstmt.setString(4, (String) updateField.get(key));
+              break;
+            default:
+              break;
+          }
         }
 
-        pstmt.setString(i, Integer.toString(comment.getId()));
+        pstmt.setString(5, comment.getCommentId());
         pstmt.addBatch();
         if (updated % batchSize == 0) {
           updated += pstmt.executeBatch().length;
@@ -195,7 +211,7 @@ public class DMLService extends SQLiteManager{
 
   public int insertCollectedComments(List<CollectedComment> comments) {
     int inserted = 0;
-    final String query = "INSERT INTO collected_comment (channel_id, parent_id, text, author_id, like_count, published_at, updated_at, comment_type, comment_id, pre_label) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    final String query = "INSERT INTO collected_comment (channel_id, parent_id, text, author_id, like_count, published_at, updated_at, comment_type, comment_id, pre_label,video_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
     Connection conn = getConnection();
     PreparedStatement pstmt = null;
 
@@ -212,6 +228,7 @@ public class DMLService extends SQLiteManager{
         pstmt.setString(8, comment.getCommentType().name());
         pstmt.setString(9, comment.getCommentId());
         pstmt.setInt(10, comment.isPreLabel() ? 1 : 0);
+        pstmt.setString(11, comment.getVideoId());
 
         pstmt.addBatch();
 

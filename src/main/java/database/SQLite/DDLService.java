@@ -13,7 +13,7 @@ public class DDLService extends SQLiteManager{
     super(dbPath);
   }
 
-  public QueryResult executeQuery(final String query) throws SQLException {
+  public QueryResult executeQuery(final String query) {
     Connection conn = null;
     QueryResult result = QueryResult.FAILURE;
     Statement stmt = null;
@@ -26,33 +26,47 @@ public class DDLService extends SQLiteManager{
       conn.commit();
     } catch (SQLException e) {
       e.printStackTrace();
-      conn.rollback();
-
+      try {
+        conn.rollback();
+      } catch (SQLException ex) {
+        ex.printStackTrace();
+      }
       result = QueryResult.FAILURE;
     } finally {
       if (stmt != null) {
-        stmt.close();
+        try {
+          stmt.close();
+        } catch (SQLException e) {
+          e.printStackTrace();
+        }
       }
     }
     return result;
   }
 
-  public boolean checkTableExists(String tableName) throws SQLException {
-    Connection conn = getConnection();
-    DatabaseMetaData meta = conn.getMetaData();
-    ResultSet tables = meta.getTables(null, null, tableName, null);
+  public boolean checkTableExists(String tableName) {
+    boolean result = false;
+    try {
+      Connection conn = getConnection();
+      DatabaseMetaData meta = conn.getMetaData();
+      ResultSet tables = meta.getTables(null, null, tableName, null);
 
-    return ( tables.next() ? tables.getRow() != 0 : false );
+      result = tables.next() ? tables.getRow() != 0 : false;
+    } catch (SQLException e) {
+      e.printStackTrace();
+      result = false;
+    }
+    return result;
   }
 
-  public QueryResult createTable(String tableName, String columns) throws SQLException {
+  public QueryResult createTable(String tableName, String columns) {
     if (checkTableExists(tableName)) {
       return QueryResult.WARNING;
     }
     return executeQuery("CREATE TABLE IF NOT EXISTS " + tableName + " (" + columns + ")");
   }
 
-  public QueryResult dropTable(String tableName) throws SQLException {
+  public QueryResult dropTable(String tableName) {
     if (!checkTableExists(tableName)) {
       return QueryResult.WARNING;
     }

@@ -26,7 +26,7 @@ public class CRUDServiceTest {
         + "channel_id TEXT, parent_id TEXT, comment_id TEXT, "
         + "author_id TEXT, like_count INTEGER, "
         + "published_at TEXT, updated_at TEXT, "
-        + "comment_type TEXT, text TEXT, pre_label INTEGER");
+        + "comment_type TEXT, text TEXT, pre_label INTEGER, video_id TEXT");
     ddlService.closeConnection();
   }
 
@@ -39,7 +39,7 @@ public class CRUDServiceTest {
 
   @Test
   public void insert() {
-    CollectedComment comment = new CollectedComment(1,"channel_id", "parent_id", "text", "author_id", 10,
+    CollectedComment comment = new CollectedComment(1,"channel_id", "parent_id", "video_id", "text", "author_id", 10,
         LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "comment_id",false);
     try {
       int inserted = dmlService.insertCollectedComment(comment);
@@ -54,8 +54,8 @@ public class CRUDServiceTest {
 
   @Test
   public void update() {
-    CollectedComment comment = new CollectedComment(1,"channel_id", "parent_id", "comment_id", "author_id", 10,
-        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "text",false);
+    CollectedComment comment = new CollectedComment(1,"channel_id", "parent_id", "video_id", "text", "author_id", 10,
+        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "comment_id",false);
     try {
       int inserted = dmlService.insertCollectedComment(comment);
       Assertions.assertEquals(1, inserted);
@@ -73,8 +73,8 @@ public class CRUDServiceTest {
 
   @Test
   public void delete() {
-    CollectedComment comment = new CollectedComment(1,"channel_id", "parent_id", "comment_id", "author_id", 10,
-        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "text", false);
+    CollectedComment comment = new CollectedComment(1,"channel_id", "parent_id", "video_id", "text", "author_id", 10,
+        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "comment_id",false);
     try {
       int inserted = dmlService.insertCollectedComment(comment);
       Assertions.assertEquals(1, inserted);
@@ -89,10 +89,10 @@ public class CRUDServiceTest {
 
   @Test
   public void insertList() {
-    CollectedComment comment1 = new CollectedComment(1,"channel_id", "parent_id", "comment_id", "author_id", 10,
-        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "text",false);
-    CollectedComment comment2 = new CollectedComment(2,"channel_id", "parent_id", "comment_id", "author_id", 10,
-        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "text", false);
+    CollectedComment comment1 = new CollectedComment(1,"channel_id", "parent_id", "video_id", "text", "author_id", 10,
+        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "comment_id",false);
+    CollectedComment comment2 = new CollectedComment(2,"channel_id", "parent_id", "video_id", "text", "author_id", 10,
+        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "comment_id2",false);
     try {
       int inserted = dmlService.insertCollectedComments(List.of(comment1, comment2));
       List<CollectedComment> selected = dqlService.selectCollectedCommentsWithFields("id", "1");
@@ -107,19 +107,19 @@ public class CRUDServiceTest {
 
   @Test
   public void updateList() {
-    CollectedComment comment1 = new CollectedComment(1,"channel_id", "parent_id", "comment_id", "author_id", 10,
-        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "text",false);
-    CollectedComment comment2 = new CollectedComment(2,"channel_id", "parent_id", "comment_id", "author_id", 10,
-        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "text", false);
+    CollectedComment comment1 = new CollectedComment(1,"channel_id", "parent_id", "video_id", "text", "author_id", 10,
+        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "comment_id",false);
+    CollectedComment comment2 = new CollectedComment(2,"channel_id", "parent_id", "video_id", "text", "author_id", 10,
+        LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "comment_id2",false);
     try {
       int inserted = dmlService.insertCollectedComments(List.of(comment1, comment2));
       Assertions.assertEquals(2, inserted);
-      CollectedComment updateComment1 = new CollectedComment(1,"channel_id", "parent_id", "comment_id", "author_id",  20,
-          LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "text",false);
+      CollectedComment updateComment1 = new CollectedComment(1,"channel_id", "parent_id", "video_id", "text", "author_id", 20,
+          LocalDateTime.now(), LocalDateTime.now(), CommentType.YOUTUBE, "comment_id",false);
       int updated = dmlService.updateCollectedComments(List.of(updateComment1, comment2));
 
       List<CollectedComment> selected = dqlService.selectCollectedCommentsWithFields("id", "1");
-
+      System.out.println(selected.toString());
       Assertions.assertEquals(2, updated);
       Assertions.assertEquals(1, selected.size());
       Assertions.assertEquals(20, selected.get(0).getLikeCount());
