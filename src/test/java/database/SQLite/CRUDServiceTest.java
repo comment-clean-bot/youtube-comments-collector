@@ -60,7 +60,7 @@ public class CRUDServiceTest {
       int inserted = dmlService.insertCollectedComment(comment);
       Assertions.assertEquals(1, inserted);
       Map<String,Object> updateMap = new HashMap<>(Map.of("like_count", 20));
-      int updated = dmlService.updateCollectedComments(comment, updateMap);
+      int updated = dmlService.updateCollectedComment(comment, updateMap);
 
       List<CollectedComment> selected = dqlService.selectCollectedCommentsWithFields("id", "1");
       Assertions.assertEquals(1, updated);
