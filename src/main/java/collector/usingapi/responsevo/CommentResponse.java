@@ -24,13 +24,16 @@ public class CommentResponse extends YoutubeApiBaseResponse {
 
   public Comment toComment() {
     return new Comment(
+        id,
         snippet.getChannelId(),
         snippet.getVideoId(),
+        snippet.getParentId(),
         snippet.getTextOriginal(),
         snippet.getAuthorDisplayName(),
         snippet.getLikeCount(),
         snippet.getPublishedAt(),
-        snippet.getUpdatedAt()
+        snippet.getUpdatedAt(),
+        null
     );
   }
 }

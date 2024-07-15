@@ -1,12 +1,15 @@
-package collector.usingapi;
+package collector.usingapi.api;
 
+import core.Video;
 import collector.usingapi.requestvo.VideoRequestPart;
+import collector.usingapi.responsevo.VideoResponse;
 import collector.usingapi.responsevo.VideosResponse;
 import collector.usingapi.utils.HttpRequestApiManage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import core.filter.IVideoFilter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,8 +33,7 @@ public class YoutubeVideoListApi {
 
   private final int totalMaxCount;
 
-  private final boolean offMusicCategory;
-
+  private final List<IVideoFilter> videoFilters;
 
   private VideosResponse lastResponse;
 
@@ -40,7 +42,8 @@ public class YoutubeVideoListApi {
   public YoutubeVideoListApi(
       String apiKey, String baseUrl,
       Set<VideoRequestPart> parts, String chart, String regionCode,
-      int maxResults, int totalMaxCount, boolean offMusicCategory) {
+      int maxResults, int totalMaxCount,
+      List<IVideoFilter> videoFilters) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
@@ -48,9 +51,9 @@ public class YoutubeVideoListApi {
     this.regionCode = regionCode;
     this.maxResults = maxResults;
     this.totalMaxCount = totalMaxCount;
-    this.offMusicCategory = offMusicCategory;
     this.lastResponse = null;
     this.totalVideoCount = 0;
+    this.videoFilters = videoFilters;
   }
 
   public int getTotalVideoCount() {
@@ -73,11 +76,16 @@ public class YoutubeVideoListApi {
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-    List<Video> videos = lastResponse.getItems().stream().map(
-        item -> item.toVideo()
-    ).collect(Collectors.toList());
-
-    videos = videos.stream().filter(video -> !offMusicCategory || !video.categoryId().equals("10")).toList();
+    List<Video> videos = lastResponse.getItems().stream().map(VideoResponse::toVideo)
+        .filter(video -> {
+          for (IVideoFilter videoFilter : videoFilters) {
+            if (!videoFilter.isAcceptable(video)) {
+              return false;
+            }
+          }
+          return true;
+        })
+        .collect(Collectors.toList());
 
     totalVideoCount += extractTotalResults(videos);
 

@@ -1,12 +1,14 @@
 package collector.usingapi;
 
+import collector.usingapi.api.YoutubeVideoListApi;
 import collector.usingapi.requestvo.VideoRequestPart;
+import core.Video;
+import filter.OffMusicCategoryVideoFilter;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -39,7 +41,7 @@ public class YoutubeVideoListApiTest {
         "KR",
         50,
         200,
-        false
+        List.of()
     );
     List<Video> output = new ArrayList<>();
     while (youtubeVideoListApi.hasNextPage()) {
@@ -60,7 +62,7 @@ public class YoutubeVideoListApiTest {
         "KR",
         50,
         200,
-        true
+        List.of(new OffMusicCategoryVideoFilter())
     );
     List<Video> output = new ArrayList<>();
     while (youtubeVideoListApi.hasNextPage()) {
@@ -71,7 +73,7 @@ public class YoutubeVideoListApiTest {
     Assertions.assertTrue(output.size() > 0);
 
     for (Video video : output) {
-      Assertions.assertFalse(video.categoryId().equals("10"));
+      Assertions.assertNotEquals("10", video.categoryId());
     }
 
   }

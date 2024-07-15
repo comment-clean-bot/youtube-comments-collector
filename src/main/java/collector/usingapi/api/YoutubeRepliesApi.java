@@ -1,4 +1,4 @@
-package collector.usingapi;
+package collector.usingapi.api;
 
 import collector.usingapi.requestvo.CommentRequestPart;
 import collector.usingapi.responsevo.CommentResponse;
@@ -36,22 +36,7 @@ public class YoutubeRepliesApi {
   public YoutubeRepliesApi(
       String apiKey, String baseUrl,
       Set<CommentRequestPart> parts, String parentId,
-      int pageSize) {
-    this.apiKey = apiKey;
-    this.baseUrl = baseUrl;
-    this.parts = new HashSet<>(parts);
-    this.parentId = parentId;
-    this.pageSize = pageSize;
-    this.maxResults = null;
-
-    this.lastResponse = null;
-    this.totalRepliesCount = 0;
-  }
-
-  public YoutubeRepliesApi(
-      String apiKey, String baseUrl,
-      Set<CommentRequestPart> parts, String parentId,
-      int pageSize, int maxResults) {
+      int pageSize, Integer maxResults) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
@@ -94,10 +79,13 @@ public class YoutubeRepliesApi {
   }
 
   public boolean hasNextPage() {
+    if (leftResultsCount() <= 0) {
+      return false;
+    }
     if (lastResponse == null) {
       return true;
     }
-    return !extractNextPageToken().isEmpty() && leftResultsCount() > 0;
+    return !extractNextPageToken().isEmpty();
   }
 
   private int leftResultsCount() {

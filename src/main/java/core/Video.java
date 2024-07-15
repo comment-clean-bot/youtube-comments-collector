@@ -1,4 +1,4 @@
-package collector.usingapi;
+package core;
 
 import java.time.LocalDateTime;
 

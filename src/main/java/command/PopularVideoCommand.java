@@ -1,9 +1,12 @@
 package command;
 
-import collector.usingapi.PopularVideoSelector;
-import collector.usingapi.Video;
+import collector.usingapi.impl.PopularVideoSelector;
 import command.handler.BaseCommandHandler;
+import core.Video;
+import core.filter.IVideoFilter;
+import filter.OffMusicCategoryVideoFilter;
 import java.io.FileReader;
+import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
 import picocli.CommandLine;
@@ -44,8 +47,10 @@ public class PopularVideoCommand implements Runnable {
   @Override
   public void run() {
     String baseUrl = "https://www.googleapis.com/youtube/v3";
+    List<IVideoFilter> videoFilters = offMusicCategory ? List.of(new OffMusicCategoryVideoFilter()) : List.of();
 
-    PopularVideoSelector popularVideoSelector = new PopularVideoSelector(apiKey, baseUrl, pageSize,totalMaxCount,offMusicCategory);
+    PopularVideoSelector popularVideoSelector = new PopularVideoSelector(
+        apiKey, baseUrl, pageSize, totalMaxCount, videoFilters);
     Stream<Video> popularVideos = popularVideoSelector.select();
     popularVideos.forEach(System.out::println);
 

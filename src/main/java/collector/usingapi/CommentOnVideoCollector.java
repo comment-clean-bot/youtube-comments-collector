@@ -1,6 +1,7 @@
 package collector.usingapi;
 
 import core.Comment;
+import core.Video;
 import java.util.List;
 
 public interface CommentOnVideoCollector {

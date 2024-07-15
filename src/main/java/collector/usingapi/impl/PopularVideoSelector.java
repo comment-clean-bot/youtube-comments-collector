@@ -1,12 +1,16 @@
-package collector.usingapi;
+package collector.usingapi.impl;
 
+import collector.usingapi.TargetVideoSelector;
+import core.Video;
+import collector.usingapi.api.YoutubeVideoListApi;
 import collector.usingapi.requestvo.VideoRequestPart;
+import core.filter.IVideoFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class PopularVideoSelector implements TargetVideoSelector{
+public class PopularVideoSelector implements TargetVideoSelector {
   private final String apiKey;
 
   private final String baseUrl;
@@ -15,14 +19,14 @@ public class PopularVideoSelector implements TargetVideoSelector{
 
   private final int totalMaxCount;
 
-  private final boolean offMusicCategory;
+  private final List<IVideoFilter> videoFilters;
 
-  public PopularVideoSelector(String apiKey, String baseUrl, int maxResults, int totalMaxCount, boolean offMusicCategory) {
+  public PopularVideoSelector(String apiKey, String baseUrl, int maxResults, int totalMaxCount, List<IVideoFilter> videoFilters) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.maxResults = maxResults;
     this.totalMaxCount = totalMaxCount;
-    this.offMusicCategory = offMusicCategory;
+    this.videoFilters = videoFilters;
   }
 
   @Override
@@ -35,7 +39,7 @@ public class PopularVideoSelector implements TargetVideoSelector{
         "KR",
         maxResults,
         totalMaxCount,
-        offMusicCategory
+        videoFilters
     );
 
     List<Video> output = new ArrayList<>();

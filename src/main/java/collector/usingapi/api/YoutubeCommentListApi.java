@@ -1,5 +1,6 @@
-package collector.usingapi;
+package collector.usingapi.api;
 
+import collector.usingapi.ReplyCollector;
 import collector.usingapi.requestvo.CommentThreadRequestPart;
 import collector.usingapi.responsevo.CommentThreadsResponse;
 import collector.usingapi.utils.HttpRequestApiManage;
@@ -8,12 +9,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import core.Comment;
+import core.filter.ICommentFilter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class YoutubeCommentListApi {
   private final static ObjectMapper objectMapper = initObjectMapper();
@@ -28,6 +32,7 @@ public class YoutubeCommentListApi {
   private final Integer maxResults;
 
   private final ReplyCollector replyCollector;
+  private final List<ICommentFilter> commentFilters;
 
   private CommentThreadsResponse lastResponse;
 
@@ -37,24 +42,8 @@ public class YoutubeCommentListApi {
   public YoutubeCommentListApi(
       String apiKey, String baseUrl,
       Set<CommentThreadRequestPart> parts, String videoId,
-      int pageSize, ReplyCollector replyCollector) {
-    this.apiKey = apiKey;
-    this.baseUrl = baseUrl;
-    this.parts = new HashSet<>(parts);
-    this.videoId = videoId;
-    this.pageSize = pageSize;
-    this.maxResults = null;
-    this.replyCollector = replyCollector;
-
-    this.lastResponse = null;
-    this.totalTopLevelCommentCount = 0;
-    this.totalCommentCount = 0;
-  }
-
-  public YoutubeCommentListApi(
-      String apiKey, String baseUrl,
-      Set<CommentThreadRequestPart> parts, String videoId,
-      int pageSize, int maxResults, ReplyCollector replyCollector) {
+      int pageSize, Integer maxResults, ReplyCollector replyCollector,
+      List<ICommentFilter> commentFilters) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.parts = new HashSet<>(parts);
@@ -62,6 +51,7 @@ public class YoutubeCommentListApi {
     this.pageSize = pageSize;
     this.maxResults = maxResults;
     this.replyCollector = replyCollector;
+    this.commentFilters = commentFilters;
 
     this.lastResponse = null;
     this.totalTopLevelCommentCount = 0;
@@ -94,10 +84,19 @@ public class YoutubeCommentListApi {
       e.printStackTrace();
     }
 
-    List<Comment> collectedComments = lastResponse.getItems().stream().map(
-        item -> item.getSnippet().getTopLevelComment().toComment()
-    ).collect(Collectors.toList());
-    collectedComments.addAll(replyCollector.collectReplies(lastResponse));
+    List<Comment> collectedComments = lastResponse.getItems().stream().flatMap(item -> {
+      List<Comment> output = new ArrayList<>();
+      Comment topLevelComment = item.getSnippet().getTopLevelComment().toComment();
+      for (ICommentFilter filter : commentFilters) {
+        if (!filter.isAcceptable(topLevelComment)) {
+          return Stream.empty();
+        }
+      }
+
+      output.add(topLevelComment);
+      output.addAll(replyCollector.collectReplies(item));
+      return output.stream();
+    }).collect(Collectors.toList());
 
     totalTopLevelCommentCount += extractTotalResults();
     totalCommentCount += collectedComments.size();
@@ -105,10 +104,13 @@ public class YoutubeCommentListApi {
   }
 
   public boolean hasNextPage() {
+    if (leftResultsCount() <= 0) {
+      return false;
+    }
     if (lastResponse == null) {
       return true;
     }
-    return !extractNextPageToken().isEmpty() && leftResultsCount() > 0;
+    return !extractNextPageToken().isEmpty();
   }
 
   private Map<String, String> makeHeaders() {

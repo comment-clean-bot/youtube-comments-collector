@@ -1,17 +1,20 @@
 package command;
 
-import collector.usingapi.BasicCommentOnVideoCollector;
 import collector.usingapi.CommentOnVideoCollector;
-import collector.usingapi.ExtractOnResponseReplyCollector;
-import collector.usingapi.ExtractWithRepliesApiCollector;
-import collector.usingapi.PopularVideoSelector;
 import collector.usingapi.ReplyCollector;
-import collector.usingapi.Video;
+import collector.usingapi.impl.BasicCommentOnVideoCollector;
+import collector.usingapi.impl.ExtractOnResponseReplyCollector;
+import collector.usingapi.impl.ExtractWithRepliesApiCollector;
+import collector.usingapi.impl.PopularVideoSelector;
 import command.handler.BaseCommandHandler;
 import container.ListContainer;
 import core.ICommentProcessor;
 import core.ICommentsContainer;
+import core.Video;
+import core.filter.IVideoFilter;
+import filter.OffMusicCategoryVideoFilter;
 import java.io.FileReader;
+import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
 import picocli.CommandLine;
@@ -74,10 +77,12 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
     String baseUrl = "https://www.googleapis.com/youtube/v3";
 
     ICommentProcessor processor = new ToCsvProcessor(filePath);
-    ICommentsContainer listContainer = new ListContainer(processor);
+    ICommentsContainer listContainer = new ListContainer(processor, 1000);
+    List<IVideoFilter> videoFilters = offMusicCategory ? List.of(new OffMusicCategoryVideoFilter()) : List.of();
+
     // Collect popular videos
     PopularVideoSelector popularVideoSelector = new PopularVideoSelector(
-        apiKey, baseUrl, videoPageSize, videoMaxResults, offMusicCategory
+        apiKey, baseUrl, videoPageSize, videoMaxResults, videoFilters
     );
     Stream<Video> popularVideos = popularVideoSelector.select();
 
@@ -86,11 +91,12 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
         new ExtractOnResponseReplyCollector();
 
     CommentOnVideoCollector commentCollector = new BasicCommentOnVideoCollector(
-        apiKey, baseUrl, commentPageSize, commentMaxResults, replyCollector);
+        apiKey, baseUrl, commentPageSize, commentMaxResults,
+        replyCollector, List.of());
 
     popularVideos.forEach(video -> listContainer.addDatas(commentCollector.collectComments(video)));
-
     listContainer.flush();
+
     System.out.println("Total comments saved to csv: " + filePath);
   }
 }
