@@ -9,13 +9,16 @@ import java.util.Map;
 public class CommentMapper {
   public static Comment toComment(CollectedComment collectedComment){
     return new Comment(
+      collectedComment.getCommentId(),
       collectedComment.getChannelId(),
+      collectedComment.getParentId(),
       collectedComment.getParentId(),
       collectedComment.getText(),
       collectedComment.getAuthorId(),
       collectedComment.getLikeCount(),
       collectedComment.getPublishedAt(),
-      collectedComment.getUpdatedAt()
+      collectedComment.getUpdatedAt(),
+      collectedComment.isPreLabel()
     );
   }
 
@@ -31,7 +34,8 @@ public class CommentMapper {
       LocalDateTime.parse((String) objectMap.get("published_at"), DMLService.DATE_FORMAT),
       LocalDateTime.parse((String) objectMap.get("updated_at"), DMLService.DATE_FORMAT),
       CommentType.valueOf((String) objectMap.get("comment_type")),
-      (String) objectMap.get("comment_id")
+      (String) objectMap.get("comment_id"),
+      ((int) objectMap.get("pre_label") == 1)
     );
   }
 }
