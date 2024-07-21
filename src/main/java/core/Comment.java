@@ -19,4 +19,8 @@ public record Comment(
     return new Comment(id, channelId, videoId, parentId, text, author, likeCount, publishedAt, updatedAt, preLabel);
   }
 
+  public String toString(){
+    return "Comment: {" + "id: " + id + ", channelId: " + channelId + ", videoId: " + videoId + ", parentId: " + parentId + ", text: " + text + ", author: " + author + ", likeCount: " + likeCount + ", publishedAt: " + publishedAt + ", updatedAt: " + updatedAt + ", preLabel: " + preLabel + "}";
+  }
+
 }

@@ -13,10 +13,11 @@ public class ToCsvProcessor implements ICommentProcessor {
   private final File file;
   private final FileWriter fileWriter;
   private final BufferedWriter bufferedWriter;
+  private final String cvsSplitBy;
   public ToCsvProcessor(String filePath) {
     this.filePath = filePath;
     this.file = new File(filePath);
-
+    this.cvsSplitBy = ",\t";
     boolean isNewFile = false;
     try {
       if (!file.exists()) {
@@ -44,37 +45,49 @@ public class ToCsvProcessor implements ICommentProcessor {
     // Implement the logic to commit the comment to a CSV file.
     // The file path is stored in the filePath variable.
     String line;
-    String cvsSplitBy = ", ";
     try {
       line = commentToString(comment, cvsSplitBy);
       bufferedWriter.write(line);
+      bufferedWriter.flush();
     } catch (IOException e) {
       e.printStackTrace();
-    } finally {
-      try {
-        if (bufferedWriter != null) {
-          bufferedWriter.flush();
-          bufferedWriter.close();
-        }
-      } catch (IOException e){
-        e.printStackTrace();
-      }
     }
   }
 
   private String commentToString(Comment comment, String splitBy){
-    String temp = comment.text().replace("\n", " ");
-
+    String textToString = textToString(comment.text(), splitBy);
+    String labelToString = labelToString(comment.preLabel());
+    String parentId = parentIdToString(comment.parentId());
+    System.out.println("labelToString: " + labelToString);
     return comment.id() + splitBy +
         comment.channelId() + splitBy +
         comment.videoId() + splitBy +
-        comment.parentId() + splitBy +
-        temp + splitBy +
+        parentId + splitBy +
+        textToString + splitBy +
         comment.author() + splitBy +
         comment.likeCount() + splitBy +
         comment.publishedAt() + splitBy +
-        comment.updatedAt() +
-        (comment.preLabel() ? "O" : "X") + "\n";
+        comment.updatedAt() + splitBy +
+        labelToString + "\n";
+  }
+
+  private String textToString(String text, String splitBy){
+    String temp = text.replace("\n", " ");
+    temp = temp.replace("\r", " ");
+    temp = temp.replace(splitBy, " ");
+    temp = temp.replace(",", " ");
+    temp = temp.replace("\"", " ");
+    temp = temp.replace("\'", " ");
+    temp = temp.replace("\t", " ");
+    return temp;
+  }
+
+  private String labelToString(Boolean preLabel){
+    return preLabel == null ? "X" : preLabel ? "O" : "X";
+  }
+
+  private String parentIdToString(String parentId){
+    return parentId == null ? "no parent" : parentId;
   }
 
   private void cleanUp() {

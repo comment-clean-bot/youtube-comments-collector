@@ -77,7 +77,8 @@ public class BasicCommentOnVideoCollector implements CommentOnVideoCollector {
     List<Comment> output = new ArrayList<>();
     for (int i = 0; i < sortedList.size(); i++) {
       if (i < PRE_LABEL_THRESHOLD) {
-        System.out.println(sortedList.get(i).likeCount() + " " + sortedList.get(i).text());
+        //If you want to see the comments, uncomment the line below
+//        System.out.println(sortedList.get(i).likeCount() + " " + sortedList.get(i).text());
         output.add(sortedList.get(i));
       } else {
         output.add(sortedList.get(i).withPreLabel(false));

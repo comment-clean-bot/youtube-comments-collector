@@ -8,6 +8,7 @@ import collector.usingapi.impl.ExtractWithRepliesApiCollector;
 import collector.usingapi.impl.PopularVideoSelector;
 import command.handler.BaseCommandHandler;
 import container.ListContainer;
+import core.Comment;
 import core.ICommentProcessor;
 import core.ICommentsContainer;
 import core.Video;
@@ -93,10 +94,10 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
     CommentOnVideoCollector commentCollector = new BasicCommentOnVideoCollector(
         apiKey, baseUrl, commentPageSize, commentMaxResults,
         replyCollector, List.of());
-
     popularVideos.forEach(video -> listContainer.addDatas(commentCollector.collectComments(video)));
     listContainer.flush();
 
     System.out.println("Total comments saved to csv: " + filePath);
+    processor.close();
   }
 }
