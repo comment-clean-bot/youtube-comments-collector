@@ -58,7 +58,6 @@ public class ToCsvProcessor implements ICommentProcessor {
     String textToString = textToString(comment.text(), splitBy);
     String labelToString = labelToString(comment.preLabel());
     String parentId = parentIdToString(comment.parentId());
-    System.out.println("labelToString: " + labelToString);
     return comment.id() + splitBy +
         comment.channelId() + splitBy +
         comment.videoId() + splitBy +
