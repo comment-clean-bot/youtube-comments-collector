@@ -10,29 +10,42 @@ import java.io.IOException;
 public class ToCsvProcessor implements ICommentProcessor {
 
   private final String filePath;
-
+  private final File file;
+  private final FileWriter fileWriter;
+  private final BufferedWriter bufferedWriter;
   public ToCsvProcessor(String filePath) {
     this.filePath = filePath;
+    this.file = new File(filePath);
+
+    boolean isNewFile = false;
+    try {
+      if (!file.exists()) {
+        isNewFile = file.createNewFile();
+      }
+      this.fileWriter = new FileWriter(file, true);
+      this.bufferedWriter = new BufferedWriter(fileWriter);
+
+      if (isNewFile) {
+        bufferedWriter.write("Id,\tChannelId,\tVideoId,\tParentId,\tText,\tAuthor,\tLikeCount,\tPublishedAt,\tUpdatedAt,\tPreLabel\n");
+        bufferedWriter.flush();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
   }
 
+  @Override
+  public void close(){
+    cleanUp();
+  }
   @Override
   public void commitData(Comment comment) {
     // Implement the logic to commit the comment to a CSV file.
     // The file path is stored in the filePath variable.
-    File file = new File(filePath);
-    BufferedWriter bufferedWriter = null;
     String line;
     String cvsSplitBy = ", ";
-    if (!file.exists()) {
-      try {
-        bufferedWriter = new BufferedWriter(new FileWriter(file, true));
-        bufferedWriter.write("ChannelId, VideoId, Text ,Author,LikeCount,PublishedAt, UpdatedAt\n");
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
     try {
-      bufferedWriter = new BufferedWriter(new FileWriter(file, true));
       line = commentToString(comment, cvsSplitBy);
       bufferedWriter.write(line);
     } catch (IOException e) {
@@ -50,12 +63,31 @@ public class ToCsvProcessor implements ICommentProcessor {
   }
 
   private String commentToString(Comment comment, String splitBy){
-    return comment.channelId() + splitBy +
+    String temp = comment.text().replace("\n", " ");
+
+    return comment.id() + splitBy +
+        comment.channelId() + splitBy +
         comment.videoId() + splitBy +
-        comment.text() + splitBy +
+        comment.parentId() + splitBy +
+        temp + splitBy +
         comment.author() + splitBy +
         comment.likeCount() + splitBy +
         comment.publishedAt() + splitBy +
-        comment.updatedAt() + "\n";
+        comment.updatedAt() +
+        (comment.preLabel() ? "O" : "X") + "\n";
+  }
+
+  private void cleanUp() {
+    try {
+      if (bufferedWriter != null) {
+        bufferedWriter.flush();
+        bufferedWriter.close();
+      }
+      if (fileWriter != null) {
+        fileWriter.close();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }
