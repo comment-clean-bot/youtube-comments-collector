@@ -3,7 +3,6 @@ package proccessor.tocsv;
 import com.opencsv.CSVWriter;
 import core.Comment;
 import core.ICommentProcessor;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,11 +13,9 @@ public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
   private final File file;
   private final FileWriter fileWriter;
   private final CSVWriter csvWriter;
-  private final String cvsSplitBy;
   public ToCsvProcessor(String filePath) {
     this.filePath = filePath;
     this.file = new File(filePath);
-    this.cvsSplitBy = ",\t";
     boolean isNewFile = false;
     try {
       if (!file.exists()) {
@@ -48,7 +45,7 @@ public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
     // The file path is stored in the filePath variable.
     String[] toWrite;
     try {
-      toWrite = commentToString(comment, cvsSplitBy);
+      toWrite = commentToString(comment);
       csvWriter.writeNext(toWrite);
       csvWriter.flush();
     } catch (IOException e) {
@@ -56,7 +53,7 @@ public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
     }
   }
 
-  private String[] commentToString(Comment comment, String splitBy){
+  private String[] commentToString(Comment comment){
     String textToString = escapeSpecialCharacters(comment.text());
     String labelToString = labelToString(comment.preLabel());
     String parentId = parentIdToString(comment.parentId());
@@ -89,7 +86,7 @@ public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
   }
 
   private String labelToString(Boolean preLabel){
-    return preLabel == null ? "X" : preLabel ? "O" : "X";
+    return preLabel == null ? "X" : (preLabel ? "O" : "X");
   }
 
   private String parentIdToString(String parentId){
