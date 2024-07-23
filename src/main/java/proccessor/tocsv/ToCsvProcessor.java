@@ -72,7 +72,7 @@ public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
 
   private String textToString(String text){
     String match = "[^\uAC00-\uD7A30-9a-zA-Z]";
-    String temp = text.replace(match, " ");
+    String temp = text.replaceAll(match, " ");
     return temp;
   }
 
