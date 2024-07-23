@@ -8,7 +8,6 @@ import collector.usingapi.impl.ExtractWithRepliesApiCollector;
 import collector.usingapi.impl.PopularVideoSelector;
 import command.handler.BaseCommandHandler;
 import container.ListContainer;
-import core.Comment;
 import core.ICommentProcessor;
 import core.ICommentsContainer;
 import core.Video;
@@ -77,7 +76,7 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
   public void run() {
     String baseUrl = "https://www.googleapis.com/youtube/v3";
 
-    ICommentProcessor processor = new ToCsvProcessor(filePath);
+    ToCsvProcessor processor = new ToCsvProcessor(filePath);
     ICommentsContainer listContainer = new ListContainer(processor, 1000);
     List<IVideoFilter> videoFilters = offMusicCategory ? List.of(new OffMusicCategoryVideoFilter()) : List.of();
 

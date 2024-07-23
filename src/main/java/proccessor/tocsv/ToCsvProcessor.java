@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class ToCsvProcessor implements ICommentProcessor {
+public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
 
   private final String filePath;
   private final File file;
@@ -55,7 +55,7 @@ public class ToCsvProcessor implements ICommentProcessor {
   }
 
   private String commentToString(Comment comment, String splitBy){
-    String textToString = textToString(comment.text(), splitBy);
+    String textToString = textToString(comment.text());
     String labelToString = labelToString(comment.preLabel());
     String parentId = parentIdToString(comment.parentId());
     return comment.id() + splitBy +
@@ -70,14 +70,9 @@ public class ToCsvProcessor implements ICommentProcessor {
         labelToString + "\n";
   }
 
-  private String textToString(String text, String splitBy){
-    String temp = text.replace("\n", " ");
-    temp = temp.replace("\r", " ");
-    temp = temp.replace(splitBy, " ");
-    temp = temp.replace(",", " ");
-    temp = temp.replace("\"", " ");
-    temp = temp.replace("\'", " ");
-    temp = temp.replace("\t", " ");
+  private String textToString(String text){
+    String match = "[^\uAC00-\uD7A30-9a-zA-Z]";
+    String temp = text.replace(match, " ");
     return temp;
   }
 

@@ -15,11 +15,4 @@ public interface ICommentProcessor {
    * @param comment the comment to commit
    */
   void commitData(Comment comment);
-
-
-  /**
-   * Close the connection to the storage.
-   * Implement this method to close the connection to the storage.
-   */
-  void close();
 }
