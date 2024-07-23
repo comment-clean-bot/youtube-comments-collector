@@ -1,5 +1,6 @@
 package proccessor.tocsv;
 
+import com.opencsv.CSVWriter;
 import core.Comment;
 import core.ICommentProcessor;
 import java.io.BufferedWriter;
@@ -12,7 +13,7 @@ public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
   private final String filePath;
   private final File file;
   private final FileWriter fileWriter;
-  private final BufferedWriter bufferedWriter;
+  private final CSVWriter csvWriter;
   private final String cvsSplitBy;
   public ToCsvProcessor(String filePath) {
     this.filePath = filePath;
@@ -24,11 +25,12 @@ public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
         isNewFile = file.createNewFile();
       }
       this.fileWriter = new FileWriter(file, true);
-      this.bufferedWriter = new BufferedWriter(fileWriter);
+      this.csvWriter = new CSVWriter(fileWriter);
 
       if (isNewFile) {
-        bufferedWriter.write("Id,\tChannelId,\tVideoId,\tParentId,\tText,\tAuthor,\tLikeCount,\tPublishedAt,\tUpdatedAt,\tPreLabel\n");
-        bufferedWriter.flush();
+        String[] header = {"id", "channelId", "videoId", "parentId", "text", "author", "likeCount", "publishedAt", "updatedAt", "preLabel"};
+        csvWriter.writeNext(header);
+        csvWriter.flush();
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -44,36 +46,46 @@ public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
   public void commitData(Comment comment) {
     // Implement the logic to commit the comment to a CSV file.
     // The file path is stored in the filePath variable.
-    String line;
+    String[] toWrite;
     try {
-      line = commentToString(comment, cvsSplitBy);
-      bufferedWriter.write(line);
-      bufferedWriter.flush();
+      toWrite = commentToString(comment, cvsSplitBy);
+      csvWriter.writeNext(toWrite);
+      csvWriter.flush();
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  private String commentToString(Comment comment, String splitBy){
-    String textToString = textToString(comment.text());
+  private String[] commentToString(Comment comment, String splitBy){
+    String textToString = escapeSpecialCharacters(comment.text());
     String labelToString = labelToString(comment.preLabel());
     String parentId = parentIdToString(comment.parentId());
-    return comment.id() + splitBy +
-        comment.channelId() + splitBy +
-        comment.videoId() + splitBy +
-        parentId + splitBy +
-        textToString + splitBy +
-        comment.author() + splitBy +
-        comment.likeCount() + splitBy +
-        comment.publishedAt() + splitBy +
-        comment.updatedAt() + splitBy +
-        labelToString + "\n";
+    return new String[]{
+        comment.id(),
+        comment.channelId(),
+        comment.videoId(),
+        parentId,
+        textToString,
+        comment.author(),
+        String.valueOf(comment.likeCount()),
+        comment.publishedAt().toString(),
+        comment.updatedAt().toString(),
+        labelToString
+    };
   }
 
-  private String textToString(String text){
-    String match = "[^\uAC00-\uD7A30-9a-zA-Z]";
-    String temp = text.replaceAll(match, " ");
-    return temp;
+  private static String escapeSpecialCharacters(String data) {
+    if (data == null) {
+      return "";
+    }
+    String escapedData = data.replaceAll("\"", "\"\"");
+    escapedData = escapedData.replaceAll("\n", "\\n");
+    escapedData = escapedData.replaceAll("\r", "\\r");
+    escapedData = escapedData.replaceAll(",", "\",\"");
+    if (data.contains(",") || data.contains("\n") || data.contains("\"")) {
+      escapedData = "\"" + escapedData + "\"";
+    }
+    return escapedData;
   }
 
   private String labelToString(Boolean preLabel){
@@ -86,9 +98,9 @@ public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
 
   private void cleanUp() {
     try {
-      if (bufferedWriter != null) {
-        bufferedWriter.flush();
-        bufferedWriter.close();
+      if (csvWriter != null) {
+        csvWriter.flush();
+        csvWriter.close();
       }
       if (fileWriter != null) {
         fileWriter.close();
