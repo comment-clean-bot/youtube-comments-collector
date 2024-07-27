@@ -4,7 +4,9 @@ import core.Comment;
 import database.SQLite.DDLService;
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -154,5 +156,20 @@ public class SQLiteCommentRepositoryTest {
     sqLiteCommentRepository.saveAll(List.of(comment1, comment2, comment3));
     List<Comment> comments = sqLiteCommentRepository.findByParentId("parent_id9-1");
     Assertions.assertEquals(2, comments.size());
+  }
+
+  @Test
+  public void update() {
+    Comment comment = new Comment("comment_id10-1","channel_id", "video_id", "parent_id", "text", "author_id", 10,
+        LocalDateTime.now(), LocalDateTime.now(), false);
+    sqLiteCommentRepository.save(comment);
+
+    Map<String, Object> updateFields = new HashMap<>();
+    updateFields.put("like_count", 20);
+    int updated = sqLiteCommentRepository.update(comment, updateFields);
+    Optional<Comment> updatedComment = sqLiteCommentRepository.findByCommentId("comment_id10-1");
+    Assertions.assertEquals(1, updated);
+    Assertions.assertTrue(updatedComment.isPresent());
+    Assertions.assertEquals(20, updatedComment.get().likeCount());
   }
 }

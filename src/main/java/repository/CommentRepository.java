@@ -2,6 +2,7 @@ package repository;
 
 import core.Comment;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface CommentRepository {
@@ -13,4 +14,5 @@ public interface CommentRepository {
   List<Comment> findByChannelId(String channelId);
   Optional<Comment> findByCommentId(String commentId);
   List<Comment> findByParentId(String parentId);
+  int update(Comment comment, Map<String, Object> updateFields);
 }

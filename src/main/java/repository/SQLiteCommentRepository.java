@@ -8,6 +8,7 @@ import database.SQLite.DQLService;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class SQLiteCommentRepository implements CommentRepository{
@@ -91,5 +92,11 @@ public class SQLiteCommentRepository implements CommentRepository{
       comments.add(CommentMapper.toComment(collectedComment));
     }
     return comments;
+  }
+
+  @Override
+  public int update(Comment comment, Map<String, Object> updateFields) {
+    CollectedComment collectedComment = CommentMapper.toCollectedComment(comment);
+    return dmlService.updateCollectedComment(collectedComment, updateFields);
   }
 }

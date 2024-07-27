@@ -69,7 +69,7 @@ public class DMLService extends SQLiteManager{
     return inserted;
   }
 
-  public int updateCollectedComments(CollectedComment comment, Map<String,Object> updateField){
+  public int updateCollectedComment(CollectedComment comment, Map<String,Object> updateField){
     final StringBuilder query = new StringBuilder("UPDATE collected_comment \n");
     final List<String> updateSeq = new ArrayList<>();
     updateField.put("updated_at", DATE_FORMAT.format(LocalDateTime.now()));
@@ -86,7 +86,7 @@ public class DMLService extends SQLiteManager{
         })
     );
     query.append("WHERE 1 = 1 \n");
-    query.append("AND id = ? ");
+    query.append("AND comment_id = ? ");
 
     final String finalQuery = query.toString();
     Connection conn = getConnection();
@@ -100,7 +100,7 @@ public class DMLService extends SQLiteManager{
       for (String key : updateSeq) {
         pstmt.setObject(i++, updateField.get(key));
       }
-      pstmt.setString(i, Integer.toString(comment.getId()));
+      pstmt.setString(i, comment.getCommentId());
 
       updated = pstmt.executeUpdate();
       conn.commit();
