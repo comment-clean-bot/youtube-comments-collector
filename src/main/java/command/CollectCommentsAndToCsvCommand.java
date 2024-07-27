@@ -76,7 +76,7 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
   public void run() {
     String baseUrl = "https://www.googleapis.com/youtube/v3";
 
-    ICommentProcessor processor = new ToCsvProcessor(filePath);
+    ToCsvProcessor processor = new ToCsvProcessor(filePath);
     ICommentsContainer listContainer = new ListContainer(processor, 1000);
     List<IVideoFilter> videoFilters = offMusicCategory ? List.of(new OffMusicCategoryVideoFilter()) : List.of();
 
@@ -93,10 +93,10 @@ public class CollectCommentsAndToCsvCommand implements Runnable{
     CommentOnVideoCollector commentCollector = new BasicCommentOnVideoCollector(
         apiKey, baseUrl, commentPageSize, commentMaxResults,
         replyCollector, List.of());
-
     popularVideos.forEach(video -> listContainer.addDatas(commentCollector.collectComments(video)));
     listContainer.flush();
 
     System.out.println("Total comments saved to csv: " + filePath);
+    processor.close();
   }
 }

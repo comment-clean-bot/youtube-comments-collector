@@ -1,61 +1,109 @@
 package proccessor.tocsv;
 
+import com.opencsv.CSVWriter;
 import core.Comment;
 import core.ICommentProcessor;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class ToCsvProcessor implements ICommentProcessor {
+public class ToCsvProcessor implements ICommentProcessor, AutoCloseable {
 
   private final String filePath;
-
+  private final File file;
+  private final FileWriter fileWriter;
+  private final CSVWriter csvWriter;
   public ToCsvProcessor(String filePath) {
     this.filePath = filePath;
+    this.file = new File(filePath);
+    boolean isNewFile = false;
+    try {
+      if (!file.exists()) {
+        isNewFile = file.createNewFile();
+      }
+      this.fileWriter = new FileWriter(file, true);
+      this.csvWriter = new CSVWriter(fileWriter);
+
+      if (isNewFile) {
+        String[] header = {"id", "channelId", "videoId", "parentId", "text", "author", "likeCount", "publishedAt", "updatedAt", "preLabel"};
+        csvWriter.writeNext(header);
+        csvWriter.flush();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
   }
 
+  @Override
+  public void close(){
+    cleanUp();
+  }
   @Override
   public void commitData(Comment comment) {
     // Implement the logic to commit the comment to a CSV file.
     // The file path is stored in the filePath variable.
-    File file = new File(filePath);
-    BufferedWriter bufferedWriter = null;
-    String line;
-    String cvsSplitBy = ", ";
-    if (!file.exists()) {
-      try {
-        bufferedWriter = new BufferedWriter(new FileWriter(file, true));
-        bufferedWriter.write("ChannelId, VideoId, Text ,Author,LikeCount,PublishedAt, UpdatedAt\n");
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
+    String[] toWrite;
     try {
-      bufferedWriter = new BufferedWriter(new FileWriter(file, true));
-      line = commentToString(comment, cvsSplitBy);
-      bufferedWriter.write(line);
+      toWrite = commentToString(comment);
+      csvWriter.writeNext(toWrite);
+      csvWriter.flush();
     } catch (IOException e) {
       e.printStackTrace();
-    } finally {
-      try {
-        if (bufferedWriter != null) {
-          bufferedWriter.flush();
-          bufferedWriter.close();
-        }
-      } catch (IOException e){
-        e.printStackTrace();
-      }
     }
   }
 
-  private String commentToString(Comment comment, String splitBy){
-    return comment.channelId() + splitBy +
-        comment.videoId() + splitBy +
-        comment.text() + splitBy +
-        comment.author() + splitBy +
-        comment.likeCount() + splitBy +
-        comment.publishedAt() + splitBy +
-        comment.updatedAt() + "\n";
+  private String[] commentToString(Comment comment){
+    String textToString = escapeSpecialCharacters(comment.text());
+    String labelToString = labelToString(comment.preLabel());
+    String parentId = parentIdToString(comment.parentId());
+    return new String[]{
+        comment.id(),
+        comment.channelId(),
+        comment.videoId(),
+        parentId,
+        textToString,
+        comment.author(),
+        String.valueOf(comment.likeCount()),
+        comment.publishedAt().toString(),
+        comment.updatedAt().toString(),
+        labelToString
+    };
+  }
+
+  private static String escapeSpecialCharacters(String data) {
+    if (data == null) {
+      return "";
+    }
+    String escapedData = data.replaceAll("\"", "\"\"");
+    escapedData = escapedData.replaceAll("\n", "\\n");
+    escapedData = escapedData.replaceAll("\r", "\\r");
+    escapedData = escapedData.replaceAll(",", "\",\"");
+    if (data.contains(",") || data.contains("\n") || data.contains("\"")) {
+      escapedData = "\"" + escapedData + "\"";
+    }
+    return escapedData;
+  }
+
+  private String labelToString(Boolean preLabel){
+    return preLabel == null ? "X" : (preLabel ? "O" : "X");
+  }
+
+  private String parentIdToString(String parentId){
+    return parentId == null ? "no parent" : parentId;
+  }
+
+  private void cleanUp() {
+    try {
+      if (csvWriter != null) {
+        csvWriter.flush();
+        csvWriter.close();
+      }
+      if (fileWriter != null) {
+        fileWriter.close();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }
